@@ -1,0 +1,283 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Building and installing HJCFIT: &#8212; HJCFIT 0.9 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="top" title="HJCFIT 0.9 documentation" href="../index.html" />
+    <link rel="up" title="Building and installing HJCFIT:" href="../install.html" />
+    <link rel="next" title="Running HJCFIT on Archer:" href="runningarcher.html" />
+    <link rel="prev" title="Building and installing HJCFIT:" href="../install.html" /> 
+  </head>
+  <body role="document">
+      <div class="header" role="banner"><h1 class="heading"><a href="../index.html">
+          <span>HJCFIT 0.9 documentation</span></a></h1>
+        <h2 class="heading"><span>Building and installing HJCFIT:</span></h2>
+      </div>
+      <div class="topnav" role="navigation" aria-label="top navigation">
+      
+        <p>
+        «&#160;&#160;<a href="../install.html">Building and installing HJCFIT:</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="runningarcher.html">Running HJCFIT on Archer:</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="building-and-installing-hjcfit">
+<h1>Building and installing HJCFIT:<a class="headerlink" href="#building-and-installing-hjcfit" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="compiling-dcprogs">
+<h2>Compiling DCProgs<a class="headerlink" href="#compiling-dcprogs" title="Permalink to this headline">¶</a></h2>
+<p>A couple of design  decisions affect the compilation of DCProgs.</p>
+<ul>
+<li><dl class="first docutils">
+<dt><a class="reference external" href="http://en.wikipedia.org/wiki/C%2B%2B11">c++11</a> is the new standard for</dt>
+<dd><p class="first last">the C++ programming languages. It is almost fully implemented by modern
+(2013) compilers. However, access to c++11 is now always default, and not
+always straight-forward. However, c++11 introduces a number of features that
+simplifies programming (e.g. <a class="reference external" href="http://www.cprogramming.com/c++11/rvalue-references-and-move-semantics-in-c++11.html">move semantics</a>)
+greatly. This is a forward looking solution implying some temporary hassle.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>[GTest](<a class="reference external" href="https://code.google.com/p/googletest/">https://code.google.com/p/googletest/</a>) is the c++ unit-test</dt>
+<dd><p class="first last">framework from google. It is required when running DCProgs&#8217; unit tests only.
+However, <a class="reference external" href="https://code.google.com/p/googletest/">GTest</a> must be compiled
+by the code it is testing. This means it should be shipped with DCProgs,
+or it should be downloaded automatically by the compilation tools. This is
+the option we have chosen. When compiling tests,
+<a class="reference external" href="http://www.cmake.org/">CMake</a> will automatically download and compile
+<a class="reference external" href="https://code.google.com/p/googletest/">GTest</a></p>
+</dd>
+</dl>
+</li>
+<li><dl class="first docutils">
+<dt>The math is done using <a class="reference external" href="http://eigen.tuxfamily.org/index.php?title=Main_Page">Eigen</a>,</dt>
+<dd><p class="first last">an efficient and widely used C++ numerical library.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<div class="section" id="dependencies">
+<h3>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic">
+<li><dl class="first docutils">
+<dt>Modern C++ compiler:</dt>
+<dd><ul class="first last simple">
+<li>g++-4.6 or greater on any platform,</li>
+<li>clang with g++-4.2 on Mountain Lion</li>
+<li>intel 13 with gnu standard libraries from g++ 4.6 (intel provides older
+gnu standard libraries).</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p class="first"><a class="reference external" href="http://www.cmake.org/">CMake</a>
+It is available on any platform, either directly through its website or via
+a packaging system (yum, apt-get for Linux, <a class="reference external" href="http://brew.sh/">Homebrew</a>
+for Mac, <a class="reference external" href="http://chocolatey.org/">chocolatey</a> for windows)</p>
+</li>
+<li><p class="first"><a class="reference external" href="http://eigen.tuxfamily.org/index.php?title=Main_Page">Eigen</a>: Users can either install eigen, or install <code class="docutils literal"><span class="pre">wget</span></code>,  <code class="docutils literal"><span class="pre">curl</span></code>
+or <a class="reference external" href="http://mercurial.selenic.com/">mercurial</a> and let the build process
+download eigen.</p>
+</li>
+</ol>
+<p>To compile the python bindings for HJCFIT a few additional dependencies are
+needed.</p>
+<ol class="arabic simple">
+<li>A working Python installation.</li>
+</ol>
+<p>Multiple different ways of installing python exist. In general we recommend
+<a class="reference external" href="https://www.continuum.io/downloads">Anaconda</a> but alternatives should work
+as well.  In any case Python along with <code class="docutils literal"><span class="pre">numpy</span></code> and <code class="docutils literal"><span class="pre">scipy</span></code> should be
+installed. HJCFIT supports both Python 2.7 and Python 3</p>
+<ol class="arabic simple">
+<li><a class="reference external" href="http://www.swig.org/">SWIG</a> used to generate the wrappings between C++ and
+Python.</li>
+<li>Behave. A behavior driven developement framework for Python.</li>
+</ol>
+</div>
+</div>
+<div class="section" id="compilation-on-mac">
+<h2>Compilation on Mac:<a class="headerlink" href="#compilation-on-mac" title="Permalink to this headline">¶</a></h2>
+<p>Make sure that you have the needed dependencies installed. We recommend using
+<a class="reference external" href="http://brew.sh/">Homebrew</a> to manage dependencies on OSX. Follow the Homebrew documentation to
+install it. The instructions below assumes that you are running a working
+python installation with <code class="docutils literal"><span class="pre">Numpy</span></code> and <code class="docutils literal"><span class="pre">`Scipy</span></code>. Behave is not currently in
+Anaconda and should be installed using <code class="docutils literal"><span class="pre">pip</span></code> in any case.</p>
+<p>Installing dependencies using Homebrew:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>brew install swig cmake
+pip install behave
+</pre></div>
+</div>
+<p>Then configure and build the code:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">cd</span> /path/to/DCProgs
+mkdir build <span class="o">&amp;&amp;</span> <span class="nb">cd</span> build
+cmake ..
+make
+make <span class="nb">test</span>
+</pre></div>
+</div>
+<p>Assuming everything works as expected we can now install HJCFIT</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>make install
+</pre></div>
+</div>
+</div>
+<div class="section" id="compilation-on-legion">
+<h2>Compilation on Legion:<a class="headerlink" href="#compilation-on-legion" title="Permalink to this headline">¶</a></h2>
+<p>For any compiler, do:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">cd</span> /path/to/DCProgs
+mkdir build <span class="o">&amp;&amp;</span> <span class="nb">cd</span> build
+</pre></div>
+</div>
+<p>Then, if the preferred compiler is g++, the module <cite>compilers/gnu/4.6.3</cite>
+should first be loaded. A working python version should be loaded. Currently
+the Legion python modules does not have behave installed so it&#8217;s recommended
+to install it using <code class="docutils literal"><span class="pre">pip</span> <span class="pre">--user</span></code>. We also need to module load <code class="docutils literal"><span class="pre">SWIG</span></code>.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>pip install --user behave
+module load python3/recommended
+module load swig/3.0.7/gnu-4.9.2
+module swap compilers compilers/gnu/4.9.2
+</pre></div>
+</div>
+<p>Then:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>cmake ..
+make
+make <span class="nb">test</span>
+</pre></div>
+</div>
+<p>Assuming everything works as expected we can now install HJCFIT</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>make install
+</pre></div>
+</div>
+</div>
+<div class="section" id="compilation-on-archer">
+<h2>Compilation on Archer:<a class="headerlink" href="#compilation-on-archer" title="Permalink to this headline">¶</a></h2>
+<p>See  <a class="reference internal" href="runningarcher.html#runningonarcher"><span class="std std-ref">Running HJCFIT on Archer:</span></a> for more information on running HJCFIT on Archer.
+Assuming that you have modules setup as in that document building HJCFIT should
+be as simple as:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>git clone -b develop https://github.com/DCPROGS/HJCFIT.git
+<span class="nb">cd</span> HJCFIT
+mkdir build
+<span class="nb">cd</span> build
+cmake ..
+make install
+make <span class="nb">test</span>
+</pre></div>
+</div>
+<div class="section" id="building-mpi4py">
+<h3>Building MPI4Py:<a class="headerlink" href="#building-mpi4py" title="Permalink to this headline">¶</a></h3>
+<p>Building mpi4py on Archer for use with the cray MPI and Anaconda is a bit
+complicated as we need to tweak the config to link against the MPI library used
+on Archer. This is assuming that we use the anaconda compute modules and gcc 5.1</p>
+<p>The following worked for me:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">CC</span><span class="o">=</span>cc
+<span class="nb">export</span> <span class="nv">CXX</span><span class="o">=</span>CC
+python setup.py build --mpi<span class="o">=</span>mpich3
+python setup.py install
+</pre></div>
+</div>
+<p>where the file mpi.cfg contains:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="o">[</span>mpich3<span class="o">]</span>
+<span class="nv">mpi_dir</span> <span class="o">=</span> /opt/cray/mpt/7.2.6/gni/mpich-gnu/51
+<span class="nv">mpicc</span>   <span class="o">=</span> /opt/cray/craype/default/bin/cc
+<span class="nv">mpicxx</span>  <span class="o">=</span> /opt/cray/craype/default/bin/CC
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="compilation-on-windows">
+<h2>Compilation on Windows:<a class="headerlink" href="#compilation-on-windows" title="Permalink to this headline">¶</a></h2>
+<p>Several different ways of building and installing on Windows exist. It should
+be possible to build the code with both MS Visual Studio and MinGW. Currently
+we recommend building using MS Visual Studio 2015. The free <a class="reference external" href="https://www.visualstudio.com/en-us/products/visual-studio-community-vs.aspx">Community edition
+of Visual Studio</a>
+is sufficient to build HJCFIT. Note that older versions of Visual Studio did not
+ship 64 bit compilers in the free version. This is no longer an issue with the
+2015 version. Python 3.5 in normally build with Visual Studio 2015 where as
+older versions are build with older versions of Visual Studio so to reduce
+any issues it is recommended to use Visual Studio 2015 and Python 3.5.</p>
+<div class="section" id="visual-studio-2015">
+<h3>Visual Studio 2015:<a class="headerlink" href="#visual-studio-2015" title="Permalink to this headline">¶</a></h3>
+<p>First ensure Visual Studio is installed. Make sure to select the C++ components
+during the installation.</p>
+<p>You then need to install the dependencies Swig, CMake. You can install curl from
+Anaconda to enable automatic download of Eigen. It&#8217;s recommended to install
+CMake and Swig from their respective homepages. Make sure that you select add
+to path when installing CMake. Following this open a command prompt.</p>
+<p>To put the relevant Microsoft compilers on Path you should run the relevant
+bat script. On most systems it should be something like:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="s2">&quot;C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat&quot;</span> amd64
+</pre></div>
+</div>
+<p>You can verify that Visual Studio is correctly loaded by execution <code class="docutils literal"><span class="pre">cl</span></code> as</p>
+<p>To install Eigen we need wget, curl or mercurial. Curl can be installed directly
+from conda. To run the Python tests we need to install behave.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>conda install curl
+pip install behave
+</pre></div>
+</div>
+<p>We can now build the code and run the tests. Unlike linux and OSX we need to
+explicitly tell CMake that we want a Release build.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">cd</span> /path/to/HJCFIT
+mkdir build <span class="o">&amp;&amp;</span> <span class="nb">cd</span> build
+cmake .. -DCMAKE_BUILD_TYPE<span class="o">=</span>Release -G <span class="s2">&quot;NMake Makefiles&quot;</span>
+nmake
+nmake <span class="nb">test</span>
+</pre></div>
+</div>
+<p>Assuming everything works as expected we can now install HJCFIT</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>nmake install
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="bottom navigation">
+      
+        <p>
+        «&#160;&#160;<a href="../install.html">Building and installing HJCFIT:</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="runningarcher.html">Running HJCFIT on Archer:</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2013-2016, University College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.
+    </div>
+  </body>
+</html>

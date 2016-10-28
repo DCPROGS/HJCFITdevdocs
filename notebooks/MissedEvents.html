@@ -1,0 +1,199 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>MissedEvents &#8212; HJCFIT 0.9 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="top" title="HJCFIT 0.9 documentation" href="../index.html" />
+    <link rel="up" title="Examples of the use of HJCFIT" href="../examples.html" />
+    <link rel="next" title="OpenMP example" href="OpenMP_example.html" />
+    <link rel="prev" title="HJCFIT- maximum likelihood fit of single-channel data:" href="Example_MLL_Fit_GlyR_4patches.html" /> 
+  </head>
+  <body role="document">
+      <div class="header" role="banner"><h1 class="heading"><a href="../index.html">
+          <span>HJCFIT 0.9 documentation</span></a></h1>
+        <h2 class="heading"><span>MissedEvents</span></h2>
+      </div>
+      <div class="topnav" role="navigation" aria-label="top navigation">
+      
+        <p>
+        «&#160;&#160;<a href="Example_MLL_Fit_GlyR_4patches.html">HJCFIT- maximum likelihood fit of single-channel data:</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="OpenMP_example.html">OpenMP example</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="missedevents">
+<h1>MissedEvents<a class="headerlink" href="#missedevents" title="Permalink to this headline">¶</a></h1>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
+</pre></div>
+</div>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+</pre></div>
+</div>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">array</span>
+<span class="kn">from</span> <span class="nn">dcprogs.likelihood</span> <span class="k">import</span> <span class="n">QMatrix</span><span class="p">,</span> <span class="n">DeterminantEq</span><span class="p">,</span> <span class="n">Asymptotes</span><span class="p">,</span> <span class="n">find_roots</span><span class="p">,</span> <span class="n">ExactSurvivor</span><span class="p">,</span> \
+                               <span class="n">ApproxSurvivor</span><span class="p">,</span> <span class="n">ApproxSurvivor</span><span class="p">,</span> <span class="n">MissedEventsG</span><span class="p">,</span> \
+                               <span class="n">expm</span>
+<span class="n">qmatrix</span> <span class="o">=</span> <span class="n">QMatrix</span><span class="p">([[</span> <span class="o">-</span><span class="mi">3050</span><span class="p">,</span>        <span class="mi">50</span><span class="p">,</span>  <span class="mi">3000</span><span class="p">,</span>      <span class="mi">0</span><span class="p">,</span>    <span class="mi">0</span> <span class="p">],</span>
+                   <span class="p">[</span> <span class="mf">2.</span><span class="o">/</span><span class="mf">3.</span><span class="p">,</span> <span class="o">-</span><span class="mf">1502.</span><span class="o">/</span><span class="mf">3.</span><span class="p">,</span>     <span class="mi">0</span><span class="p">,</span>    <span class="mi">500</span><span class="p">,</span>    <span class="mi">0</span> <span class="p">],</span>
+                   <span class="p">[</span>    <span class="mi">15</span><span class="p">,</span>         <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">2065</span><span class="p">,</span>     <span class="mi">50</span><span class="p">,</span> <span class="mi">2000</span> <span class="p">],</span>
+                   <span class="p">[</span>     <span class="mi">0</span><span class="p">,</span>     <span class="mi">15000</span><span class="p">,</span>  <span class="mi">4000</span><span class="p">,</span> <span class="o">-</span><span class="mi">19000</span><span class="p">,</span>    <span class="mi">0</span> <span class="p">],</span>
+                   <span class="p">[</span>     <span class="mi">0</span><span class="p">,</span>         <span class="mi">0</span><span class="p">,</span>    <span class="mi">10</span><span class="p">,</span>      <span class="mi">0</span><span class="p">,</span>  <span class="o">-</span><span class="mi">10</span> <span class="p">]</span> <span class="p">],</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">qmatrix</span> <span class="o">=</span> <span class="n">QMatrix</span><span class="p">([[</span> <span class="o">-</span><span class="mf">1.639102438935231</span><span class="p">,</span>  <span class="mf">0.9279328542626132</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>  <span class="mf">0.7111695846726181</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">],</span>
+       <span class="p">[</span>  <span class="mf">7319.818837397022</span><span class="p">,</span>  <span class="o">-</span><span class="mf">7319.818837397022</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">],</span>
+       <span class="p">[</span>                  <span class="mi">0</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5849255773178983</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span> <span class="mf">0.05800330713458401</span><span class="p">,</span>  <span class="mf">0.5269222701833143</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">],</span>
+       <span class="p">[</span>  <span class="mf">554.9144283943098</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>   <span class="o">-</span><span class="mf">556.415038972956</span><span class="p">,</span>   <span class="mf">0.670095369096168</span><span class="p">,</span>  <span class="mf">0.8305152095500998</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">],</span>
+       <span class="p">[</span>                  <span class="mi">0</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>   <span class="mf">4445.029004693305</span><span class="p">,</span>  <span class="o">-</span><span class="mf">4445.029004693305</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">],</span>
+       <span class="p">[</span>                  <span class="mi">0</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>  <span class="mf">0.7249830360634507</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.7855125406770954</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span> <span class="mf">0.06052950461364481</span><span class="p">],</span>
+       <span class="p">[</span>                  <span class="mi">0</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>  <span class="mf">0.4346782743227515</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>  <span class="o">-</span><span class="mf">3554.307968015994</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>   <span class="mf">3553.873289741671</span><span class="p">],</span>
+       <span class="p">[</span>                  <span class="mi">0</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>  <span class="mf">0.6916315120151144</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.6916315120151144</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">],</span>
+       <span class="p">[</span>                  <span class="mi">0</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>   <span class="mf">5390.604449280132</span><span class="p">,</span>   <span class="mf">0.435406457067279</span><span class="p">,</span>                   <span class="mi">0</span><span class="p">,</span>  <span class="o">-</span><span class="mf">5391.039855737199</span><span class="p">]],</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">transitions</span> <span class="o">=</span> <span class="n">qmatrix</span>
+<span class="n">tau</span> <span class="o">=</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">4</span>
+<span class="n">a</span> <span class="o">=</span> <span class="n">DeterminantEq</span><span class="p">(</span><span class="n">transitions</span><span class="p">,</span> <span class="n">tau</span><span class="p">)</span>
+<span class="n">G</span> <span class="o">=</span> <span class="n">MissedEventsG</span><span class="p">(</span><span class="n">transitions</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="n">approx</span> <span class="o">=</span> <span class="n">ApproxSurvivor</span><span class="p">(</span><span class="n">transitions</span><span class="p">,</span> <span class="n">tau</span><span class="p">)</span>
+<span class="n">exact</span> <span class="o">=</span> <span class="n">ExactSurvivor</span><span class="p">(</span><span class="n">transitions</span><span class="p">,</span> <span class="n">tau</span><span class="p">)</span>
+<span class="n">factor</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">qmatrix</span><span class="o">.</span><span class="n">fa</span><span class="p">,</span> <span class="n">expm</span><span class="p">(</span><span class="n">tau</span><span class="o">*</span><span class="n">qmatrix</span><span class="o">.</span><span class="n">aa</span><span class="p">))</span>
+<span class="c1">#print factor</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">G</span><span class="o">.</span><span class="n">fa</span><span class="p">(</span><span class="n">tau</span> <span class="o">*</span> <span class="mf">1.31838319649</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">exact</span><span class="o">.</span><span class="n">fa</span><span class="p">(</span><span class="n">tau</span> <span class="o">*</span> <span class="mf">1.31838319649</span><span class="o">-</span><span class="n">tau</span><span class="p">),</span> <span class="n">factor</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[[</span>  <span class="mf">5.45096768e+02</span>   <span class="mf">3.58690111e-02</span>   <span class="mf">4.58704226e-17</span><span class="p">]</span>
+ <span class="p">[</span>  <span class="mf">7.25589315e+01</span>   <span class="mf">4.77459650e-03</span>  <span class="o">-</span><span class="mf">3.30159469e-18</span><span class="p">]</span>
+ <span class="p">[</span>  <span class="mf">1.26939914e-02</span>   <span class="mf">8.35302916e-07</span>   <span class="mf">5.28345648e-12</span><span class="p">]</span>
+ <span class="p">[</span>  <span class="mf">3.84501585e-05</span>   <span class="mf">2.53013637e-09</span>   <span class="mf">3.88147430e-01</span><span class="p">]</span>
+ <span class="p">[</span> <span class="o">-</span><span class="mf">7.28448003e-18</span>  <span class="o">-</span><span class="mf">4.79340753e-22</span>   <span class="mf">6.91575829e-01</span><span class="p">]</span>
+ <span class="p">[</span>  <span class="mf">1.03253949e-03</span>   <span class="mf">6.79442118e-08</span>   <span class="mf">5.22642795e-06</span><span class="p">]]</span>
+<span class="p">[[</span>  <span class="mf">5.45096768e+02</span>   <span class="mf">3.58690111e-02</span>   <span class="mf">4.58704226e-17</span><span class="p">]</span>
+ <span class="p">[</span>  <span class="mf">7.25589315e+01</span>   <span class="mf">4.77459650e-03</span>  <span class="o">-</span><span class="mf">3.30159469e-18</span><span class="p">]</span>
+ <span class="p">[</span>  <span class="mf">1.26939914e-02</span>   <span class="mf">8.35302916e-07</span>   <span class="mf">5.28345648e-12</span><span class="p">]</span>
+ <span class="p">[</span>  <span class="mf">3.84501585e-05</span>   <span class="mf">2.53013637e-09</span>   <span class="mf">3.88147430e-01</span><span class="p">]</span>
+ <span class="p">[</span> <span class="o">-</span><span class="mf">7.28448003e-18</span>  <span class="o">-</span><span class="mf">4.79340753e-22</span>   <span class="mf">6.91575829e-01</span><span class="p">]</span>
+ <span class="p">[</span>  <span class="mf">1.03253949e-03</span>   <span class="mf">6.79442118e-08</span>   <span class="mf">5.22642795e-06</span><span class="p">]]</span>
+</pre></div>
+</div>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dcprogs.likelihood</span> <span class="k">import</span> <span class="n">network</span>
+<span class="kn">from</span> <span class="nn">networkx</span> <span class="k">import</span> <span class="n">draw</span> <span class="k">as</span> <span class="n">nx_draw</span><span class="p">,</span> <span class="n">draw_spectral</span>
+
+<span class="n">graph</span> <span class="o">=</span> <span class="n">network</span><span class="p">(</span><span class="n">qmatrix</span><span class="p">)</span>
+<span class="n">nx_draw</span><span class="p">(</span><span class="n">graph</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../_images/MissedEvents_4_0.png" src="../_images/MissedEvents_4_0.png" />
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">outer</span>
+<span class="kn">from</span> <span class="nn">dcprogs.likelihood</span> <span class="k">import</span> <span class="n">Asymptotes</span><span class="p">,</span> <span class="n">DeterminantEq</span><span class="p">,</span> <span class="n">eig</span><span class="p">,</span> <span class="n">inv</span>
+<span class="n">eigenvalues</span><span class="p">,</span> <span class="n">eigenvectors</span> <span class="o">=</span> <span class="n">eig</span><span class="p">(</span><span class="o">-</span><span class="n">qmatrix</span><span class="o">.</span><span class="n">matrix</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">get_ci00</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">outer</span><span class="p">(</span><span class="n">eigenvectors</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">inv</span><span class="p">(</span><span class="n">eigenvectors</span><span class="p">)[</span><span class="n">i</span><span class="p">,</span> <span class="p">:])[:</span><span class="n">qmatrix</span><span class="o">.</span><span class="n">nopen</span><span class="p">,</span> <span class="p">:</span><span class="n">qmatrix</span><span class="o">.</span><span class="n">nopen</span><span class="p">]</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">get_ci00</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">eigenvalues</span><span class="p">)):</span>
+   <span class="c1"># if abs(eigenvalues[i]) &gt; 1e-8:</span>
+        <span class="n">s</span> <span class="o">+=</span> <span class="n">get_ci00</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">approx</span><span class="o">.</span><span class="n">af_components</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">approx</span><span class="o">.</span><span class="n">af_components</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">approx</span><span class="o">.</span><span class="n">af_components</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[[</span>  <span class="mf">1.00000000e+00</span>  <span class="o">-</span><span class="mf">3.72362979e-20</span>   <span class="mf">3.98565840e-17</span><span class="p">]</span>
+ <span class="p">[</span> <span class="o">-</span><span class="mf">1.90203993e-16</span>   <span class="mf">1.00000000e+00</span>   <span class="mf">8.58280665e-28</span><span class="p">]</span>
+ <span class="p">[</span> <span class="o">-</span><span class="mf">1.83880688e-16</span>  <span class="o">-</span><span class="mf">1.43995601e-20</span>   <span class="mf">1.00000000e+00</span><span class="p">]]</span>
+<span class="p">[[</span>  <span class="mf">9.99998098e-01</span>   <span class="mf">7.10033034e-11</span>  <span class="o">-</span><span class="mf">1.18861914e-21</span><span class="p">]</span>
+ <span class="p">[</span>  <span class="mf">5.60101709e-07</span>   <span class="mf">1.00000000e+00</span>  <span class="o">-</span><span class="mf">1.19196101e-21</span><span class="p">]</span>
+ <span class="p">[</span> <span class="o">-</span><span class="mf">1.22912506e-13</span>  <span class="o">-</span><span class="mf">4.23663173e-17</span>   <span class="mf">9.99999998e-01</span><span class="p">]]</span>
+</pre></div>
+</div>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">tau</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">tau</span><span class="p">,</span> <span class="n">n</span> <span class="o">*</span> <span class="n">tau</span><span class="p">,</span> <span class="n">tau</span> <span class="o">/</span> <span class="mf">10.</span><span class="p">)</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">exact</span><span class="o">.</span><span class="n">af</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">tau</span><span class="p">),</span> <span class="n">G</span><span class="o">.</span><span class="n">af_factor</span><span class="p">)[:,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;exact&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">approx</span><span class="o">.</span><span class="n">af</span><span class="p">(</span><span class="n">x</span><span class="o">-</span><span class="n">tau</span><span class="p">),</span> <span class="n">G</span><span class="o">.</span><span class="n">af_factor</span><span class="p">)[:,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="s2">&quot;-.&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;approx&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">G</span><span class="o">.</span><span class="n">af</span><span class="p">(</span><span class="n">x</span><span class="p">)[:,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;G&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Component $</span><span class="si">{0}</span><span class="s2">$ of the matrix $^{{e}}G_{{af}}$.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)))</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="c1">#legend()</span>
+<span class="c1">#display(gcf())</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">G</span><span class="o">.</span><span class="n">tmax</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="mf">0.00030000000000000003</span>
+<span class="p">[</span> <span class="mf">0.0001</span>   <span class="mf">0.00011</span>  <span class="mf">0.00012</span>  <span class="mf">0.00013</span>  <span class="mf">0.00014</span>  <span class="mf">0.00015</span>  <span class="mf">0.00016</span>  <span class="mf">0.00017</span>
+  <span class="mf">0.00018</span>  <span class="mf">0.00019</span>  <span class="mf">0.0002</span>   <span class="mf">0.00021</span>  <span class="mf">0.00022</span>  <span class="mf">0.00023</span>  <span class="mf">0.00024</span>  <span class="mf">0.00025</span>
+  <span class="mf">0.00026</span>  <span class="mf">0.00027</span>  <span class="mf">0.00028</span>  <span class="mf">0.00029</span>  <span class="mf">0.0003</span> <span class="p">]</span>
+</pre></div>
+</div>
+<img alt="../_images/MissedEvents_6_1.png" src="../_images/MissedEvents_6_1.png" />
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dcprogs.likelihood</span> <span class="k">import</span> <span class="n">DeterminantEq</span><span class="p">,</span> <span class="n">find_lower_bound_for_roots</span><span class="p">,</span> <span class="n">eig</span>
+<span class="n">a</span> <span class="o">=</span> <span class="n">DeterminantEq</span><span class="p">([[</span> <span class="o">-</span><span class="mf">0.9765569699831389</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>   <span class="mf">0.9765569699831388</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">],</span>
+       <span class="p">[</span>                   <span class="mi">0</span><span class="p">,</span>   <span class="o">-</span><span class="mf">21087.12668613774</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>    <span class="mf">4972.429427806393</span><span class="p">,</span>    <span class="mf">9423.400001111493</span><span class="p">,</span>   <span class="mf">0.7672868902249316</span><span class="p">,</span>    <span class="mf">6690.529970329637</span><span class="p">],</span>
+       <span class="p">[</span>                   <span class="mi">0</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.02903705186960781</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>  <span class="mf">0.02903705186960781</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">],</span>
+       <span class="p">[</span>                   <span class="mi">0</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>   <span class="o">-</span><span class="mf">8967.619224739678</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>    <span class="mf">8967.455151523045</span><span class="p">,</span>   <span class="mf">0.1640732166323416</span><span class="p">],</span>
+       <span class="p">[</span>                   <span class="mi">0</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>   <span class="mf">0.2978885248190503</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>  <span class="o">-</span><span class="mf">0.4287224564347299</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>   <span class="mf">0.1308339316156797</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">],</span>
+       <span class="p">[</span>                   <span class="mi">0</span><span class="p">,</span>   <span class="mf">0.7275421797587975</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>    <span class="o">-</span><span class="mf">1.19022223735187</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>    <span class="mf">0.102814653125226</span><span class="p">,</span>   <span class="mf">0.3598654044678464</span><span class="p">],</span>
+       <span class="p">[</span>  <span class="mf">0.1209377584689361</span><span class="p">,</span>  <span class="mf">0.05943271459974253</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>  <span class="o">-</span><span class="mf">0.1803704730686787</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">],</span>
+       <span class="p">[</span>                   <span class="mi">0</span><span class="p">,</span>   <span class="mf">0.8265398081401302</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>   <span class="mf">0.6009896070678163</span><span class="p">,</span>    <span class="mf">3588.624442956896</span><span class="p">,</span>   <span class="mf">0.7814141825061616</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>    <span class="o">-</span><span class="mf">3590.83338655461</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">],</span>
+       <span class="p">[</span>                   <span class="mi">0</span><span class="p">,</span>   <span class="mf">0.8191655510502869</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>    <span class="mf">8172.231231533744</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>    <span class="mf">7421.575697898968</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>                    <span class="mi">0</span><span class="p">,</span>   <span class="o">-</span><span class="mf">15594.62609498376</span><span class="p">]],</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">4</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">eig</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">H</span><span class="p">(</span><span class="o">-</span><span class="mi">126523</span><span class="p">))[</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">find_lower_bound_for_roots</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span> <span class="o">-</span><span class="mf">6.59166060e+05</span>   <span class="mf">6.46519434e+05</span>  <span class="o">-</span><span class="mf">3.22595069e+01</span>   <span class="mf">2.85250486e+01</span>
+  <span class="o">-</span><span class="mf">6.72742082e-01</span>  <span class="o">-</span><span class="mf">2.90668063e-02</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">-</span><span class="mf">25304.63240237971</span>
+</pre></div>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="bottom navigation">
+      
+        <p>
+        «&#160;&#160;<a href="Example_MLL_Fit_GlyR_4patches.html">HJCFIT- maximum likelihood fit of single-channel data:</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="OpenMP_example.html">OpenMP example</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2013-2016, University College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.
+    </div>
+  </body>
+</html>

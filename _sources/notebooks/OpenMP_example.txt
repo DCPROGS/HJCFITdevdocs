@@ -1,0 +1,172 @@
+
+OpenMP example
+==============
+
+In this example we illustrate how OpenMP can be used to speedup the
+calculation of the likelihood.
+
+First we set the number of openmp threads. This is done via an
+environmental variable called ``OMP_NUM_THREADS``. In this example we
+set the value of the variable from Python but typically this will be
+done directly in a shell script before running the example i.e.
+something like:
+
+::
+
+    export OMP_NUM_THREADS=4
+    python script.py
+
+.. code:: python
+
+    import os
+    os.environ['OMP_NUM_THREADS'] = '4'
+
+Note that only the value of ``OMP_NUM_THREADS`` at import time
+infulences the execution. To experiment with OpenMP restart the notebook
+kernel, change the value in the cell above reexecute. You should see the
+time of execution change in the last cell.
+
+Some general settings:
+
+.. code:: python
+
+    %matplotlib inline
+    import matplotlib
+    import matplotlib.pyplot as plt
+
+.. code:: python
+
+    import sys, time, math
+    import numpy as np
+    from numpy import linalg as nplin
+
+Load data
+~~~~~~~~~
+
+HJCFIT depends on DCPROGS/DCPYPS module for data input and setting
+kinetic mechanism:
+
+.. code:: python
+
+    from dcpyps.samples import samples
+    from dcpyps import dataset, mechanism, dcplots, dcio
+
+.. code:: python
+
+    # LOAD DATA: Burzomato 2004 example set.
+    scnfiles = [["./samples/glydemo/A-10.scn"], 
+                ["./samples/glydemo/B-30.scn"],
+                ["./samples/glydemo/C-100.scn"], 
+                ["./samples/glydemo/D-1000.scn"]]
+    tr = [0.000030, 0.000030, 0.000030, 0.000030]
+    tc = [0.004, -1, -0.06, -0.02]
+    conc = [10e-6, 30e-6, 100e-6, 1000e-6]
+
+Initialise Single-Channel Record from dcpyps. Note that SCRecord takes a
+list of file names; several SCN files from the same patch can be loaded.
+
+.. code:: python
+
+    # Initaialise SCRecord instance.
+    recs = []
+    bursts = []
+    for i in range(len(scnfiles)):
+        rec = dataset.SCRecord(scnfiles[i], conc[i], tr[i], tc[i])
+        recs.append(rec)
+        bursts.append(rec.bursts.intervals())
+
+Load demo mechanism (C&H82 numerical example)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code:: python
+
+    # LOAD FLIP MECHANISM USED in Burzomato et al 2004
+    mecfn = "./samples/mec/demomec.mec"
+    version, meclist, max_mecnum = dcio.mec_get_list(mecfn)
+    mec = dcio.mec_load(mecfn, meclist[2][0])
+
+.. code:: python
+
+    # PREPARE RATE CONSTANTS.
+    # Fixed rates.
+    #fixed = np.array([False, False, False, False, False, False, False, True,
+    #    False, False, False, False, False, False])
+    for i in range(len(mec.Rates)):
+        mec.Rates[i].fixed = False
+    
+    # Constrained rates.
+    mec.Rates[21].is_constrained = True
+    mec.Rates[21].constrain_func = mechanism.constrain_rate_multiple
+    mec.Rates[21].constrain_args = [17, 3]
+    mec.Rates[19].is_constrained = True
+    mec.Rates[19].constrain_func = mechanism.constrain_rate_multiple
+    mec.Rates[19].constrain_args = [17, 2]
+    mec.Rates[16].is_constrained = True
+    mec.Rates[16].constrain_func = mechanism.constrain_rate_multiple
+    mec.Rates[16].constrain_args = [20, 3]
+    mec.Rates[18].is_constrained = True
+    mec.Rates[18].constrain_func = mechanism.constrain_rate_multiple
+    mec.Rates[18].constrain_args = [20, 2]
+    mec.Rates[8].is_constrained = True
+    mec.Rates[8].constrain_func = mechanism.constrain_rate_multiple
+    mec.Rates[8].constrain_args = [12, 1.5]
+    mec.Rates[13].is_constrained = True
+    mec.Rates[13].constrain_func = mechanism.constrain_rate_multiple
+    mec.Rates[13].constrain_args = [9, 2]
+    mec.update_constrains()
+    # Rates constrained by microscopic reversibility
+    mec.set_mr(True, 7, 0)
+    mec.set_mr(True, 14, 1)
+    
+    # Update constrains
+    mec.update_constrains()
+
+.. code:: python
+
+    #Propose initial guesses different from recorded ones 
+    initial_guesses = [5000.0, 500.0, 2700.0, 2000.0, 800.0, 15000.0, 300.0, 120000, 6000.0,
+                       0.45E+09, 1500.0, 12000.0, 4000.0, 0.9E+09, 7500.0, 1200.0, 3000.0, 
+                       0.45E+07, 2000.0, 0.9E+07, 1000, 0.135E+08]
+    mec.set_rateconstants(initial_guesses)
+    mec.update_constrains()
+
+Prepare likelihood function
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code:: python
+
+    def dcprogslik(x, lik, m, c):
+        m.theta_unsqueeze(np.exp(x))
+        l = 0
+        for i in range(len(c)):
+            m.set_eff('c', c[i])
+            l += lik[i](m.Q)
+        return -l * math.log(10)
+
+.. code:: python
+
+    # Import HJCFIT likelihood function
+    from dcprogs.likelihood import Log10Likelihood
+    
+    kwargs = {'nmax': 2, 'xtol': 1e-12, 'rtol': 1e-12, 'itermax': 100,
+        'lower_bound': -1e6, 'upper_bound': 0}
+    likelihood = []
+    
+    for i in range(len(recs)):
+        likelihood.append(Log10Likelihood(bursts[i], mec.kA,
+            recs[i].tres, recs[i].tcrit, **kwargs))
+    theta = mec.theta()
+
+Time evaluation of likelihood function
+--------------------------------------
+
+.. code:: python
+
+    %timeit dcprogslik(np.log(theta), likelihood, mec, conc)
+
+
+.. parsed-literal::
+
+    10 loops, best of 3: 34 ms per loop
+
+

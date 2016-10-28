@@ -1,0 +1,255 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Building documentation: &#8212; HJCFIT 0.9 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="top" title="HJCFIT 0.9 documentation" href="../index.html" />
+    <link rel="up" title="Building and installing HJCFIT:" href="../install.html" />
+    <link rel="next" title="Customising build and install:" href="customisinginstall.html" />
+    <link rel="prev" title="Running HJCFIT on Archer:" href="runningarcher.html" /> 
+  </head>
+  <body role="document">
+      <div class="header" role="banner"><h1 class="heading"><a href="../index.html">
+          <span>HJCFIT 0.9 documentation</span></a></h1>
+        <h2 class="heading"><span>Building documentation:</span></h2>
+      </div>
+      <div class="topnav" role="navigation" aria-label="top navigation">
+      
+        <p>
+        «&#160;&#160;<a href="runningarcher.html">Running HJCFIT on Archer:</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="customisinginstall.html">Customising build and install:</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="building-documentation">
+<h1>Building documentation:<a class="headerlink" href="#building-documentation" title="Permalink to this headline">¶</a></h1>
+<p>The documentation is written using <a class="reference external" href="http://www.doxygen.org">doxygen</a> for c++,
+<a class="reference external" href="http://sphinx-doc.org/">sphinx</a> for python, and
+<a class="reference external" href="https://pypi.python.org/pypi/breathe">breathe</a> to tie them together.
+It yields <a class="reference external" href="http://dcprogs.github.io/HJCFIT/">this</a> an automatic build of the
+documentation from the development branch is
+<a class="reference external" href="http://dcprogs.github.io/HJCFITdevdocs/">here</a>.</p>
+<div class="section" id="pre-requisites">
+<h2>Pre-requisites<a class="headerlink" href="#pre-requisites" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="installing-doxygen">
+<h3>Installing doxygen<a class="headerlink" href="#installing-doxygen" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Linux: apt-get, yum, or other package manager</li>
+<li>Mac: <code class="docutils literal"><span class="pre">brew</span> <span class="pre">install</span> <span class="pre">doxygen</span></code></li>
+<li>Windows: binaries can be found
+<a class="reference external" href="http://www.stack.nl/~dimitri/doxygen/download.html">here</a></li>
+</ul>
+</div>
+<div class="section" id="installing-sphinx">
+<h3>Installing Sphinx<a class="headerlink" href="#installing-sphinx" title="Permalink to this headline">¶</a></h3>
+<p>Sphinx is a regular python package that can be installed as any other python
+package.</p>
+<ul>
+<li><dl class="first docutils">
+<dt>Linux:</dt>
+<dd><p class="first last">apt-get, yum, pip or conda depending on your setup.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">Mac: <code class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">sphinx</span></code> or <code class="docutils literal"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">sphinx</span></code></p>
+</li>
+<li><dl class="first docutils">
+<dt>Windows: Depending on your setup</dt>
+<dd><ul class="first last simple">
+<li><code class="docutils literal"><span class="pre">conda.bat</span> <span class="pre">install</span> <span class="pre">sphinx</span></code></li>
+<li>or, <code class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">sphinx</span></code></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">If using a virtual environment, it is recommended to run
+<code class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">--upgrade</span> <span class="pre">sphinx</span></code> (within the virtual environment)
+so that sphinx is set up with the right path. Then one should make sure
+that <code class="docutils literal"><span class="pre">SPHINX_EXECUTABLE</span></code> in <code class="docutils literal"><span class="pre">`build/CMakeCache.txt</span></code> points to the
+correct sphinx executable.</p>
+</div>
+</div>
+<div class="section" id="installing-breathe">
+<h3>Installing Breathe<a class="headerlink" href="#installing-breathe" title="Permalink to this headline">¶</a></h3>
+<p>In all cases, do <code class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">Breathe</span></code>. If you are using conda it might
+first be necessary to install the pip package via conda.</p>
+</div>
+<div class="section" id="installing-sphinx-plugin-for-citation">
+<h3>Installing Sphinx plugin for citation<a class="headerlink" href="#installing-sphinx-plugin-for-citation" title="Permalink to this headline">¶</a></h3>
+<p><code class="docutils literal"><span class="pre">sphinxcontrib.bibtext</span></code> makes it possible to use a bibtex file,
+<code class="docutils literal"><span class="pre">documentation/source/bibliography.bib</span></code>, to hold reference to papers.
+It can be installed with <code class="docutils literal"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">sphinxcontrib-bibtex</span></code></p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">On Mac, with python2.7 installed from brew, I&#8217;ve had to add an empty
+<code class="docutils literal"><span class="pre">__init__.py</span></code> file in <code class="docutils literal"><span class="pre">site-packages/sphinxcontrib</span></code> for its <code class="docutils literal"><span class="pre">bibtex</span></code>
+subpackage to be found. This may have been fixed in a later release?</p>
+</div>
+</div>
+</div>
+<div class="section" id="compiling-the-documentation-for-python">
+<h2>Compiling the Documentation for Python<a class="headerlink" href="#compiling-the-documentation-for-python" title="Permalink to this headline">¶</a></h2>
+<p>The code must be installed and accessible before trying to compile the
+documentation, at least when the python bindings are compiled.
+This means:</p>
+<ol class="arabic simple">
+<li>The library is in the <code class="docutils literal"><span class="pre">PATH</span></code> (windows), <code class="docutils literal"><span class="pre">DYLD_LIBRARY_PATH</span></code> (Mac),
+or the <code class="docutils literal"><span class="pre">LD_LIBRARY_PATH</span></code> (Linux)</li>
+<li>The python bindings are in the <code class="docutils literal"><span class="pre">sys.path</span></code>
+(e.g. <code class="docutils literal"><span class="pre">python</span> <span class="pre">-c</span> <span class="pre">&quot;import</span> <span class="pre">dcprogs.likelihood&quot;</span></code> does not fail)</li>
+</ol>
+<p>The reason for this is that python documentation software will interrogate
+the package to find out what it contains. Hence the package needs to be
+available and loadable. Please refer to the documentation
+for instructions on installing HJCFIT.</p>
+<p>Once HJCFIT is installed and available, do:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">cd</span> /path/to/buid/
+make documentation
+</pre></div>
+</div>
+<p>The documentation should be available at
+<code class="docutils literal"><span class="pre">path/to/build/documentation/sphinx/index.html</span></code>.</p>
+</div>
+<div class="section" id="including-jupyter-notebooks-in-documentation">
+<h2>Including Jupyter Notebooks in documentation<a class="headerlink" href="#including-jupyter-notebooks-in-documentation" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal"><span class="pre">make</span> <span class="pre">documentation</span></code> will attempt to convert and include all Jupyter
+notebooks in <code class="docutils literal"><span class="pre">exploration</span></code> to be included in the documentation. This requires
+<code class="docutils literal"><span class="pre">pandoc</span></code> and <code class="docutils literal"><span class="pre">nbconvert</span></code> to be installed. If these dependencies are not
+found the build will skip this step. <code class="docutils literal"><span class="pre">`nbconvert</span></code> can be installed from your
+regular python package manager (conda or pip). <code class="docutils literal"><span class="pre">pandoc</span></code> can be installed with
+os packages managers. On OSX:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>brew install pandoc
+</pre></div>
+</div>
+<p>on Linux:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>apt-get install pandoc
+</pre></div>
+</div>
+<p>as well as from conda.</p>
+<p><code class="docutils literal"><span class="pre">make</span> <span class="pre">documentation</span></code> will also attempt to execute the notebooks before
+including them. This requires <code class="docutils literal"><span class="pre">ipykernel</span></code> to be installed which can be
+installed in the same way as <code class="docutils literal"><span class="pre">nbconvert</span></code> above. In addition it requires
+all dependencies of the notebooks to be installed. These are currently
+<code class="docutils literal"><span class="pre">matplotlib</span></code> and <code class="docutils literal"><span class="pre">networkx</span></code></p>
+<p>You can also control the Jupyter kernel used to execute the notebooks by
+setting the CMake variable <code class="docutils literal"><span class="pre">JUPYTER_KERNEL</span></code> This defaults to <code class="docutils literal"><span class="pre">python2</span></code> or
+<code class="docutils literal"><span class="pre">python3</span></code> depending on the python version used but can be useful to override
+if you need to use a custom environment.</p>
+<p>The execution of notebooks can also explicitly be disabled by setting the
+variable <code class="docutils literal"><span class="pre">executenotebooks</span></code> to off.</p>
+</div>
+<div class="section" id="updating-the-web-page">
+<h2>Updating the web-page<a class="headerlink" href="#updating-the-web-page" title="Permalink to this headline">¶</a></h2>
+<p>The data for the web page resides on the same git repository that the code does
+in a special branch called <code class="docutils literal"><span class="pre">gh-pages</span></code>. And conversely, github knows to
+render <a class="reference external" href="http://dcprogs.github.io/HJCFITdevdocs/">here</a>. anything that is in
+the branch <code class="docutils literal"><span class="pre">gh-pages</span></code>.</p>
+<p>It is possible to update the data and the web-page with the following commands:</p>
+<ol class="arabic simple">
+<li>Commit any changes to the code that should be kept safe.</li>
+<li>Go to the build directory</li>
+<li>Update the docs</li>
+</ol>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>make documentation
+</pre></div>
+</div>
+<ol class="arabic simple">
+<li>Checkout the gh_pages using one the two lines below:</li>
+</ol>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>git checkout -t origin/gh-pages <span class="c1"># If first time, if the branch does not exist</span>
+git checkout gh-pages
+</pre></div>
+</div>
+<p>At this point, the source directory does not contain code anymore. It contains data for the documentation webpage.</p>
+<ol class="arabic simple">
+<li>Copy the new documentation from the build directory to the source directory:</li>
+</ol>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>rsync -r documentation/sphinx/* ..
+</pre></div>
+</div>
+<ol class="arabic simple">
+<li>Commit the changes to the documentation. If nothing happens,
+there were likely no changes:</li>
+</ol>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>git commit -a
+</pre></div>
+</div>
+<p>At this juncture, the data has been updated on the local computer. All that
+needs to be done is to push it to github, so github knows to render it.</p>
+<ol class="arabic simple">
+<li>Push the changes back to github so the web-site can be updated:</li>
+</ol>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>git push
+</pre></div>
+</div>
+<ol class="arabic simple">
+<li>Checkout the master branch again</li>
+</ol>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>git checkout master
+</pre></div>
+</div>
+</div>
+<div class="section" id="compiling-the-documentation-without-python-bindings">
+<h2>Compiling the documentation without Python bindings<a class="headerlink" href="#compiling-the-documentation-without-python-bindings" title="Permalink to this headline">¶</a></h2>
+<p>A fairly bare documentation of the c++ api is available.
+It can be obtained by running</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">cd</span> /path/to/build/
+make doxydocs
+</pre></div>
+</div>
+<p>The documents are then available at <code class="docutils literal"><span class="pre">build/documentation/html/index.html</span></code>.</p>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="bottom navigation">
+      
+        <p>
+        «&#160;&#160;<a href="runningarcher.html">Running HJCFIT on Archer:</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="customisinginstall.html">Customising build and install:</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2013-2016, University College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.
+    </div>
+  </body>
+</html>

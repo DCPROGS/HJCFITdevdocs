@@ -1,0 +1,117 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Building and installing HJCFIT: &#8212; HJCFIT 0.9 documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="HJCFIT 0.9 documentation" href="index.html" />
+    <link rel="next" title="Building and installing HJCFIT:" href="install/install.html" />
+    <link rel="prev" title="Multi-precision math" href="mpfr.html" /> 
+  </head>
+  <body role="document">
+      <div class="header" role="banner"><h1 class="heading"><a href="index.html">
+          <span>HJCFIT 0.9 documentation</span></a></h1>
+        <h2 class="heading"><span>Building and installing HJCFIT:</span></h2>
+      </div>
+      <div class="topnav" role="navigation" aria-label="top navigation">
+      
+        <p>
+        «&#160;&#160;<a href="mpfr.html">Multi-precision math</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="install/install.html">Building and installing HJCFIT:</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="building-and-installing-hjcfit">
+<h1>Building and installing HJCFIT:<a class="headerlink" href="#building-and-installing-hjcfit" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install/install.html">Building and installing HJCFIT:</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="install/install.html#compiling-dcprogs">Compiling DCProgs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install/install.html#compilation-on-mac">Compilation on Mac:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install/install.html#compilation-on-legion">Compilation on Legion:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install/install.html#compilation-on-archer">Compilation on Archer:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install/install.html#compilation-on-windows">Compilation on Windows:</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="install/runningarcher.html">Running HJCFIT on Archer:</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="install/runningarcher.html#filesystems">Filesystems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install/runningarcher.html#bashrc">.bashrc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install/runningarcher.html#python-virtual-environment">Python Virtual Environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install/runningarcher.html#loging-in-to-archer-and-getting-hjcfit">Loging in to ARCHER and getting HJCFIT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install/runningarcher.html#job-files">Job files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install/runningarcher.html#submitting-a-job">Submitting a job</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install/runningarcher.html#queues">Queues</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install/runningarcher.html#copying-files-to-and-from-archer">Copying files to and from ARCHER</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install/runningarcher.html#virtualenvs-on-archer">Virtualenvs on archer.</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="install/documentation.html">Building documentation:</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="install/documentation.html#pre-requisites">Pre-requisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install/documentation.html#compiling-the-documentation-for-python">Compiling the Documentation for Python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install/documentation.html#including-jupyter-notebooks-in-documentation">Including Jupyter Notebooks in documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install/documentation.html#updating-the-web-page">Updating the web-page</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install/documentation.html#compiling-the-documentation-without-python-bindings">Compiling the documentation without Python bindings</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="install/customisinginstall.html">Customising build and install:</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="install/customisinginstall.html#customising-installation-location">Customising Installation location</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install/customisinginstall.html#specific-eigen-installation">Specific Eigen Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install/customisinginstall.html#customising-compiler">Customising Compiler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install/customisinginstall.html#enable-long-double-numbers">Enable Long Double numbers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install/customisinginstall.html#disable-openmp">Disable OpenMP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install/customisinginstall.html#python-bindings">Python Bindings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install/customisinginstall.html#enabling-fallback-to-multi-precision-arithmetic">Enabling fallback to Multi precision arithmetic</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="bottom navigation">
+      
+        <p>
+        «&#160;&#160;<a href="mpfr.html">Multi-precision math</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="install/install.html">Building and installing HJCFIT:</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2013-2016, University College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.
+    </div>
+  </body>
+</html>

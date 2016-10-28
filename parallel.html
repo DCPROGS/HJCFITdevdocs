@@ -1,0 +1,97 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Running likelihood calculations in parallel &#8212; HJCFIT 0.9 documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="HJCFIT 0.9 documentation" href="index.html" />
+    <link rel="next" title="Multi-precision math" href="mpfr.html" />
+    <link rel="prev" title="Exact Survivor Function" href="notebooks/exact_survivor.html" /> 
+  </head>
+  <body role="document">
+      <div class="header" role="banner"><h1 class="heading"><a href="index.html">
+          <span>HJCFIT 0.9 documentation</span></a></h1>
+        <h2 class="heading"><span>Running likelihood calculations in parallel</span></h2>
+      </div>
+      <div class="topnav" role="navigation" aria-label="top navigation">
+      
+        <p>
+        «&#160;&#160;<a href="notebooks/exact_survivor.html">Exact Survivor Function</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="mpfr.html">Multi-precision math</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="running-likelihood-calculations-in-parallel">
+<h1>Running likelihood calculations in parallel<a class="headerlink" href="#running-likelihood-calculations-in-parallel" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="openmp">
+<h2>OpenMP<a class="headerlink" href="#openmp" title="Permalink to this headline">¶</a></h2>
+<p>HJCFIT will by default be compiled with openmp support. The parallelisation
+is by default over either the number of bursts or over the individual open
+close transitions within the burst. Typically experiments either have many
+short bursts or a few long bursts so it really only makes sense to parallelise
+over one of these axes. The code takes care of detecting which axis to
+parallelise over automatically. The number of threads can be controlled by
+the usual environmental variable <code class="docutils literal"><span class="pre">OMP_NUM_THREADS</span></code>. Running on a PC this
+will probably be set to the number of cores in the computer which is probably
+the optimal solution in most cases.</p>
+<p>CMake takes care of identifying the correct compiler flags and enables OpenMP
+automatically on all supported platforms. Currently (2016) Clang on OSX does not
+support OpenMP (but the code can be compiled on OSX using gcc from homebrew
+or similar)</p>
+<p>OpenMP can be disabled explicitly by setting the CMake variable <code class="docutils literal"><span class="pre">openmp</span></code> to
+off.</p>
+</div>
+<div class="section" id="mpi">
+<h2>MPI<a class="headerlink" href="#mpi" title="Permalink to this headline">¶</a></h2>
+<p>Write something about MPI</p>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="bottom navigation">
+      
+        <p>
+        «&#160;&#160;<a href="notebooks/exact_survivor.html">Exact Survivor Function</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="mpfr.html">Multi-precision math</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2013-2016, University College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.
+    </div>
+  </body>
+</html>

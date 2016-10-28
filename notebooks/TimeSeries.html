@@ -1,0 +1,124 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Time series &#8212; HJCFIT 0.9 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="top" title="HJCFIT 0.9 documentation" href="../index.html" />
+    <link rel="up" title="Examples of the use of HJCFIT" href="../examples.html" />
+    <link rel="next" title="Approx Survivor" href="approx_survivor.html" />
+    <link rel="prev" title="OpenMP example" href="OpenMP_example.html" /> 
+  </head>
+  <body role="document">
+      <div class="header" role="banner"><h1 class="heading"><a href="../index.html">
+          <span>HJCFIT 0.9 documentation</span></a></h1>
+        <h2 class="heading"><span>Time series</span></h2>
+      </div>
+      <div class="topnav" role="navigation" aria-label="top navigation">
+      
+        <p>
+        «&#160;&#160;<a href="OpenMP_example.html">OpenMP example</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="approx_survivor.html">Approx Survivor</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="time-series">
+<h1>Time series<a class="headerlink" href="#time-series" title="Permalink to this headline">¶</a></h1>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
+</pre></div>
+</div>
+<p>Just checking the logic.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">dcprogs.likelihood</span> <span class="k">import</span> <span class="n">plot_time_series</span>
+<span class="kn">from</span> <span class="nn">dcprogs.likelihood.random</span> <span class="k">import</span> <span class="n">time_series</span> <span class="k">as</span> <span class="n">random_time_series</span>
+
+<span class="n">perfect</span><span class="p">,</span> <span class="n">series</span> <span class="o">=</span> <span class="n">random_time_series</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">tau</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">perfect</span><span class="p">)</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">plot_time_series</span><span class="p">(</span><span class="n">perfect</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="n">plot_time_series</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span>   <span class="mf">0.</span>            <span class="mf">8.94723321</span>   <span class="mf">17.58625122</span>   <span class="mf">20.91738707</span>   <span class="mf">30.20777201</span>
+   <span class="mf">39.32092447</span>   <span class="mf">46.79161468</span>   <span class="mf">52.77685434</span>   <span class="mf">61.48455584</span>   <span class="mf">67.44456259</span>
+   <span class="mf">74.100705</span>     <span class="mf">81.16816666</span>   <span class="mf">86.41390341</span>   <span class="mf">93.2990448</span>    <span class="mf">98.32441428</span>
+  <span class="mf">105.58728546</span>  <span class="mf">114.71226183</span>  <span class="mf">121.79759018</span>  <span class="mf">128.39316551</span>  <span class="mf">137.89193074</span>
+  <span class="mf">143.38102535</span>  <span class="mf">152.56225579</span>  <span class="mf">160.16272388</span>  <span class="mf">167.17517573</span>  <span class="mf">175.01513147</span>
+  <span class="mf">180.92863655</span>  <span class="mf">188.3360409</span>   <span class="mf">197.29145568</span>  <span class="mf">206.70028088</span>  <span class="mf">213.93436107</span>
+  <span class="mf">218.10289559</span>  <span class="mf">224.6773545</span>   <span class="mf">230.09537989</span>  <span class="mf">233.76001015</span>  <span class="mf">240.67886355</span>
+  <span class="mf">247.87099605</span>  <span class="mf">251.756665</span>    <span class="mf">255.63396464</span>  <span class="mf">260.34412052</span>  <span class="mf">267.56884572</span>
+  <span class="mf">271.05676428</span>  <span class="mf">276.28833648</span>  <span class="mf">285.1861875</span>   <span class="mf">288.87919303</span>  <span class="mf">296.47228537</span>
+  <span class="mf">304.46016273</span>  <span class="mf">312.91504567</span>  <span class="mf">320.69227562</span>  <span class="mf">328.90975232</span>  <span class="mf">337.32091015</span>
+  <span class="mf">342.86258197</span>  <span class="mf">351.00318569</span>  <span class="mf">359.85877781</span>  <span class="mf">362.9354895</span>   <span class="mf">366.49640284</span>
+  <span class="mf">374.80184694</span>  <span class="mf">382.90380628</span>  <span class="mf">388.63786471</span>  <span class="mf">392.28760556</span>  <span class="mf">401.04635203</span>
+  <span class="mf">404.57265817</span>  <span class="mf">414.50588183</span>  <span class="mf">419.35422088</span>  <span class="mf">426.84891827</span>  <span class="mf">430.39730468</span>
+  <span class="mf">435.1928332</span>   <span class="mf">442.92866593</span>  <span class="mf">446.46914111</span>  <span class="mf">450.29317602</span>  <span class="mf">455.83836839</span>
+  <span class="mf">461.27886045</span>  <span class="mf">465.35700447</span>  <span class="mf">474.47964825</span>  <span class="mf">482.3700017</span>   <span class="mf">487.15319401</span>
+  <span class="mf">491.89688188</span>  <span class="mf">495.74211533</span>  <span class="mf">504.51676039</span>  <span class="mf">513.93686707</span>  <span class="mf">522.20488861</span>
+  <span class="mf">531.23128829</span>  <span class="mf">537.67515504</span>  <span class="mf">543.47407658</span>  <span class="mf">550.50406751</span>  <span class="mf">558.884036</span>
+  <span class="mf">568.0541782</span>   <span class="mf">571.76171722</span>  <span class="mf">581.04217683</span>  <span class="mf">584.39539916</span>  <span class="mf">591.43409644</span>
+  <span class="mf">594.51307274</span>  <span class="mf">597.64494175</span>  <span class="mf">603.90633403</span>  <span class="mf">612.42260853</span>  <span class="mf">615.74390755</span>
+  <span class="mf">621.16093995</span>  <span class="mf">627.8050522</span>   <span class="mf">634.23335659</span>  <span class="mf">639.03347348</span>  <span class="mf">648.10262786</span>
+  <span class="mf">651.84007882</span><span class="p">]</span>
+</pre></div>
+</div>
+<img alt="../_images/TimeSeries_3_1.png" src="../_images/TimeSeries_3_1.png" />
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dcprogs.likelihood</span> <span class="k">import</span> <span class="n">time_filter</span> <span class="k">as</span> <span class="n">cpp_time_filter</span>
+<span class="n">filtered</span> <span class="o">=</span> <span class="n">cpp_time_filter</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">plot_time_series</span><span class="p">(</span><span class="n">perfect</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+<span class="n">plot_time_series</span><span class="p">(</span><span class="n">filtered</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;k&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../_images/TimeSeries_4_0.png" src="../_images/TimeSeries_4_0.png" />
+<p>Now, computes the likelihood of this time series for a random QMatrix</p>
+</div>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="bottom navigation">
+      
+        <p>
+        «&#160;&#160;<a href="OpenMP_example.html">OpenMP example</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="approx_survivor.html">Approx Survivor</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2013-2016, University College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.
+    </div>
+  </body>
+</html>

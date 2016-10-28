@@ -1,0 +1,96 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Multi-precision math &#8212; HJCFIT 0.9 documentation</title>
+    
+    <link rel="stylesheet" href="_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="top" title="HJCFIT 0.9 documentation" href="index.html" />
+    <link rel="next" title="Building and installing HJCFIT:" href="install.html" />
+    <link rel="prev" title="Running likelihood calculations in parallel" href="parallel.html" /> 
+  </head>
+  <body role="document">
+      <div class="header" role="banner"><h1 class="heading"><a href="index.html">
+          <span>HJCFIT 0.9 documentation</span></a></h1>
+        <h2 class="heading"><span>Multi-precision math</span></h2>
+      </div>
+      <div class="topnav" role="navigation" aria-label="top navigation">
+      
+        <p>
+        «&#160;&#160;<a href="parallel.html">Running likelihood calculations in parallel</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="install.html">Building and installing HJCFIT:</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="multi-precision-math">
+<h1>Multi-precision math<a class="headerlink" href="#multi-precision-math" title="Permalink to this headline">¶</a></h1>
+<p>The nature of the calculations involved in HJCFIT especially in the root
+finding means that the code is susceptible to issues related to the limited
+precision of the floating point numbers use to represent values within the
+code. To work around these issues the code is able to use GMP and MPFR to
+perform specific calculations at higher precision. As multi precision math is
+not implemented in hardware it comes with very significant run time overhead,
+typically orders of magnitude slower we have added support for multi-precision
+as a fall back mechanism. Currently there is only support for fallback in
+<code class="docutils literal"><span class="pre">find_eigs_bound</span></code> which is known to be problematic. The pattern that we
+follow is to do the calculations with regular precision floating point. If that
+fails we rerun  the calculation with multi-precision. Currently only at 128
+bits but that could easily be extended via an iterative process to arbitrary
+precision.</p>
+<p>The code can be compilled with and without this feature. Currently CMake is
+setup to automatically download and build <code class="docutils literal"><span class="pre">GMP</span></code> and <code class="docutils literal"><span class="pre">MPFR</span></code> on <code class="docutils literal"><span class="pre">OSX</span></code> and
+linux if not found. However, this feature is not enabled on Windows by default.
+<code class="docutils literal"><span class="pre">GMP</span></code> is not supported on Windows but it should be possible to build and use
+<code class="docutils literal"><span class="pre">MPIR</span></code> as a drop-in replacement for <code class="docutils literal"><span class="pre">GMP</span></code> on windows which <code class="docutils literal"><span class="pre">MPFR</span></code> can be
+linked against. However, there is currently no support for building this
+automatically on windows. To control if this option should be enabled the flag
+<code class="docutils literal"><span class="pre">DCPROGS_USE_MPFR</span></code> can be set to <code class="docutils literal"><span class="pre">on</span></code> or <code class="docutils literal"><span class="pre">off</span></code>.</p>
+</div>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="bottom navigation">
+      
+        <p>
+        «&#160;&#160;<a href="parallel.html">Running likelihood calculations in parallel</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="install.html">Building and installing HJCFIT:</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2013-2016, University College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Customising build and install: &#8212; HJCFIT 0.9 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="top" title="HJCFIT 0.9 documentation" href="../index.html" />
+    <link rel="up" title="Building and installing HJCFIT:" href="../install.html" />
+    <link rel="prev" title="Building documentation:" href="documentation.html" /> 
+  </head>
+  <body role="document">
+      <div class="header" role="banner"><h1 class="heading"><a href="../index.html">
+          <span>HJCFIT 0.9 documentation</span></a></h1>
+        <h2 class="heading"><span>Customising build and install:</span></h2>
+      </div>
+      <div class="topnav" role="navigation" aria-label="top navigation">
+      
+        <p>
+        «&#160;&#160;<a href="documentation.html">Building documentation:</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="customising-build-and-install">
+<h1>Customising build and install:<a class="headerlink" href="#customising-build-and-install" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="customising-installation-location">
+<h2>Customising Installation location<a class="headerlink" href="#customising-installation-location" title="Permalink to this headline">¶</a></h2>
+<p>CMake does provide a gui and a ncurse interface. They are not covered here,
+but highly recommended nevertheless.</p>
+<p>Installing to a particular root directory from the command-line with CMake is
+fairly easy:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">cd</span> /path/to/dcprogs_source/build
+cmake .. -DCMAKE_INSTALL_PREFIX<span class="o">=</span>/path/to/install/to
+make
+make install
+</pre></div>
+</div>
+<p>The above will put executable in <code class="docutils literal"><span class="pre">/path/to/install/to/bin</span></code>, headers in
+<code class="docutils literal"><span class="pre">/path/to/install/to/include</span></code>, and libraries in <code class="docutils literal"><span class="pre">`/path/to/install/to/lib</span></code>.</p>
+</div>
+<div class="section" id="specific-eigen-installation">
+<h2>Specific Eigen Installation<a class="headerlink" href="#specific-eigen-installation" title="Permalink to this headline">¶</a></h2>
+<p>Similarly, compiling with a particular installation of
+<a class="reference external" href="http://eigen.tuxfamily.org/index.php?title=Main_Page">Eigen</a> in mind can be
+done with:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">cd</span> /path/to/dcprogs_source/build
+cmake .. -DEIGEN3_INCLUDE_DIR<span class="o">=</span>/path/to/include/eigen3
+</pre></div>
+</div>
+<p>On windows, the path is likely something like <cite>pathtoeigeninstallationincludeeigen3</cite>.</p>
+</div>
+<div class="section" id="customising-compiler">
+<h2>Customising Compiler<a class="headerlink" href="#customising-compiler" title="Permalink to this headline">¶</a></h2>
+<p>It is also possible to set the compiler explicitly. However, this <em>must</em> be done at the very
+start. If CMake was run in the build directory, then everything in that directory should be
+deleted (delete the build, not the source directory!) before attempting to set the compiler.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">cd</span> /path/to/dcprogs_source
+mkdir build <span class="o">&amp;&amp;</span> build
+<span class="nb">export</span> <span class="nv">CC</span><span class="o">=</span>/path/to/ccompiler
+<span class="nb">export</span> <span class="nv">CXX</span><span class="o">=</span>/path/to/cppcompiler
+cmake .. -DCMAKE_CXX_COMPILER<span class="o">=</span>/path/to/compiler
+make
+</pre></div>
+</div>
+</div>
+<div class="section" id="enable-long-double-numbers">
+<h2>Enable Long Double numbers<a class="headerlink" href="#enable-long-double-numbers" title="Permalink to this headline">¶</a></h2>
+<p>It is possible to compile the code to run with long double numbers
+(long doubles are 80bit on most platforms apart from MS Visual Studio where
+they are identical to doubles i.e. 64bit). This could alleviate some of the
+overflow/underflow errors at the cost of performance. It is not a solution but
+a step in the right direction.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">cd</span> /path/to/dcprogs/build
+cmake .. -DDCPROGS_LONG_DOUBLE<span class="o">=</span>TRUE
+</pre></div>
+</div>
+<p>At this juncture, functions that return python scalars are still returning real
+numbers of 64bit. Functions that return numpy arrays have the correct size, however.</p>
+</div>
+<div class="section" id="disable-openmp">
+<h2>Disable OpenMP<a class="headerlink" href="#disable-openmp" title="Permalink to this headline">¶</a></h2>
+<p>OpenMP support is automatically enabled provided that your compiler supports it.
+You can explicitly disable it by doing:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">cd</span> /path/to/dcprogs/build
+cmake .. -Dopenmp<span class="o">=</span>off
+</pre></div>
+</div>
+</div>
+<div class="section" id="python-bindings">
+<h2>Python Bindings<a class="headerlink" href="#python-bindings" title="Permalink to this headline">¶</a></h2>
+<p>The Python bindings are automatically enabled but can be disabled by doing:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">cd</span> /path/to/dcprogs/build
+cmake .. -DpythonBindings<span class="o">=</span>off
+</pre></div>
+</div>
+</div>
+<div class="section" id="enabling-fallback-to-multi-precision-arithmetic">
+<h2>Enabling fallback to Multi precision arithmetic<a class="headerlink" href="#enabling-fallback-to-multi-precision-arithmetic" title="Permalink to this headline">¶</a></h2>
+<p>Todo.</p>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="bottom navigation">
+      
+        <p>
+        «&#160;&#160;<a href="documentation.html">Building documentation:</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2013-2016, University College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.
+    </div>
+  </body>
+</html>

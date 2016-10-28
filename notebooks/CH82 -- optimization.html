@@ -1,0 +1,236 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>CH82 – optimization &#8212; HJCFIT 0.9 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="top" title="HJCFIT 0.9 documentation" href="../index.html" />
+    <link rel="up" title="Examples of the use of HJCFIT" href="../examples.html" />
+    <link rel="next" title="CHS vector" href="CHSvectors.html" />
+    <link rel="prev" title="CH82 Model" href="CH82.html" /> 
+  </head>
+  <body role="document">
+      <div class="header" role="banner"><h1 class="heading"><a href="../index.html">
+          <span>HJCFIT 0.9 documentation</span></a></h1>
+        <h2 class="heading"><span>CH82 – optimization</span></h2>
+      </div>
+      <div class="topnav" role="navigation" aria-label="top navigation">
+      
+        <p>
+        «&#160;&#160;<a href="CH82.html">CH82 Model</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="CHSvectors.html">CHS vector</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="ch82-optimization">
+<h1>CH82 &#8211; optimization<a class="headerlink" href="#ch82-optimization" title="Permalink to this headline">¶</a></h1>
+<p>Input: Defines the model and constraints</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dcprogs</span> <span class="k">import</span> <span class="n">read_idealized_bursts</span>
+<span class="kn">from</span> <span class="nn">dcprogs.likelihood</span> <span class="k">import</span> <span class="n">QMatrix</span>
+
+<span class="n">name</span>   <span class="o">=</span> <span class="s2">&quot;CH82.scn&quot;</span>
+<span class="n">tau</span>    <span class="o">=</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">4</span>
+<span class="n">tcrit</span>  <span class="o">=</span> <span class="mi">4</span><span class="n">e</span><span class="o">-</span><span class="mi">3</span>
+<span class="n">graph</span>  <span class="o">=</span> <span class="p">[[</span><span class="s2">&quot;V&quot;</span><span class="p">,</span> <span class="s2">&quot;V&quot;</span><span class="p">,</span> <span class="s2">&quot;V&quot;</span><span class="p">,</span>   <span class="mi">0</span><span class="p">,</span>   <span class="mi">0</span><span class="p">],</span>
+          <span class="p">[</span><span class="s2">&quot;V&quot;</span><span class="p">,</span> <span class="s2">&quot;V&quot;</span><span class="p">,</span>   <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;V&quot;</span><span class="p">,</span>   <span class="mi">0</span><span class="p">],</span>
+          <span class="p">[</span><span class="s2">&quot;V&quot;</span><span class="p">,</span>   <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;V&quot;</span><span class="p">,</span> <span class="s2">&quot;V&quot;</span><span class="p">,</span> <span class="s2">&quot;V&quot;</span><span class="p">],</span>
+          <span class="p">[</span>  <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;V&quot;</span><span class="p">,</span> <span class="s2">&quot;V&quot;</span><span class="p">,</span> <span class="s2">&quot;V&quot;</span><span class="p">,</span>   <span class="mi">0</span><span class="p">],</span>
+          <span class="p">[</span>  <span class="mi">0</span><span class="p">,</span>   <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;V&quot;</span><span class="p">,</span>   <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;V&quot;</span><span class="p">]]</span>
+<span class="n">nopen</span>  <span class="o">=</span> <span class="mi">2</span>
+<span class="n">qmatrix</span> <span class="o">=</span> <span class="n">QMatrix</span><span class="p">([[</span> <span class="o">-</span><span class="mi">3050</span><span class="p">,</span>        <span class="mi">50</span><span class="p">,</span>  <span class="mi">3000</span><span class="p">,</span>      <span class="mi">0</span><span class="p">,</span>    <span class="mi">0</span> <span class="p">],</span>
+                  <span class="p">[</span> <span class="mf">2.</span><span class="o">/</span><span class="mf">3.</span><span class="p">,</span> <span class="o">-</span><span class="mf">1502.</span><span class="o">/</span><span class="mf">3.</span><span class="p">,</span>     <span class="mi">0</span><span class="p">,</span>    <span class="mi">500</span><span class="p">,</span>    <span class="mi">0</span> <span class="p">],</span>
+                  <span class="p">[</span>    <span class="mi">15</span><span class="p">,</span>         <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">2065</span><span class="p">,</span>     <span class="mi">50</span><span class="p">,</span> <span class="mi">2000</span> <span class="p">],</span>
+                  <span class="p">[</span>     <span class="mi">0</span><span class="p">,</span>     <span class="mi">15000</span><span class="p">,</span>  <span class="mi">4000</span><span class="p">,</span> <span class="o">-</span><span class="mi">19000</span><span class="p">,</span>    <span class="mi">0</span> <span class="p">],</span>
+                  <span class="p">[</span>     <span class="mi">0</span><span class="p">,</span>         <span class="mi">0</span><span class="p">,</span>    <span class="mi">10</span><span class="p">,</span>      <span class="mi">0</span><span class="p">,</span>  <span class="o">-</span><span class="mi">10</span> <span class="p">]</span> <span class="p">],</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="n">bursts</span> <span class="o">=</span> <span class="n">read_idealized_bursts</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">tau</span><span class="o">=</span><span class="n">tau</span><span class="p">,</span> <span class="n">tcrit</span><span class="o">=</span><span class="n">tcrit</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Creates the constraints, the likelihood function, as well as a function
+to create random Q-matrix.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="k">import</span> <span class="n">minimize</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">NaN</span><span class="p">,</span> <span class="n">zeros</span><span class="p">,</span> <span class="n">arange</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">dcprogs.likelihood.random</span> <span class="k">import</span> <span class="n">qmatrix</span> <span class="k">as</span> <span class="n">random_qmatrix</span>
+<span class="kn">from</span> <span class="nn">dcprogs.likelihood</span> <span class="k">import</span> <span class="n">QMatrix</span><span class="p">,</span> <span class="n">Log10Likelihood</span>
+<span class="kn">from</span> <span class="nn">dcprogs.likelihood.optimization</span> <span class="k">import</span> <span class="n">reduce_likelihood</span>
+
+<span class="n">likelihood</span> <span class="o">=</span> <span class="n">Log10Likelihood</span><span class="p">(</span><span class="n">bursts</span><span class="p">,</span> <span class="n">nopen</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">tcrit</span><span class="p">)</span>
+<span class="n">reduced</span> <span class="o">=</span> <span class="n">reduce_likelihood</span><span class="p">(</span><span class="n">likelihood</span><span class="p">,</span> <span class="n">graph</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">reduced</span><span class="o">.</span><span class="n">to_reduced_coords</span><span class="p">(</span> <span class="n">random_qmatrix</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">matrix</span> <span class="p">)</span>
+
+<span class="n">constraints</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">def</span> <span class="nf">create_inequality_constraints</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">0</span><span class="n">e0</span><span class="p">,</span> <span class="n">sign</span><span class="o">=</span><span class="mi">1</span><span class="n">e0</span><span class="p">):</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">sign</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  <span class="o">-</span> <span class="n">value</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">df</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">zeros</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">sign</span>
+        <span class="k">return</span> <span class="n">a</span>
+    <span class="k">return</span> <span class="n">f</span><span class="p">,</span> <span class="n">df</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)):</span>
+    <span class="n">f</span><span class="p">,</span> <span class="n">df</span> <span class="o">=</span> <span class="n">create_inequality_constraints</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    <span class="n">constraints</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;ineq&#39;</span><span class="p">,</span> <span class="s1">&#39;fun&#39;</span><span class="p">:</span> <span class="n">f</span><span class="p">,</span> <span class="s1">&#39;jac&#39;</span><span class="p">:</span> <span class="n">df</span><span class="p">})</span>
+    <span class="n">f</span><span class="p">,</span> <span class="n">df</span> <span class="o">=</span> <span class="n">create_inequality_constraints</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="n">e4</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">constraints</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;ineq&#39;</span><span class="p">,</span> <span class="s1">&#39;fun&#39;</span><span class="p">:</span> <span class="n">f</span><span class="p">,</span> <span class="s1">&#39;jac&#39;</span><span class="p">:</span> <span class="n">df</span><span class="p">})</span>
+
+
+<span class="k">def</span> <span class="nf">random_starting_point</span><span class="p">():</span>
+    <span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">infty</span><span class="p">,</span> <span class="n">NaN</span>
+    <span class="kn">from</span> <span class="nn">dcprogs.likelihood.random</span> <span class="k">import</span> <span class="n">rate_matrix</span> <span class="k">as</span> <span class="n">random_rate_matrix</span>
+
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
+        <span class="n">matrix</span> <span class="o">=</span> <span class="n">random_rate_matrix</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">qmatrix</span><span class="o">.</span><span class="n">matrix</span><span class="p">),</span> <span class="n">zeroprob</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">reduced</span><span class="o">.</span><span class="n">to_reduced_coords</span><span class="p">(</span> <span class="n">matrix</span> <span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">reduced</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">reduced</span><span class="o">.</span><span class="n">to_full_coords</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">result</span> <span class="o">!=</span> <span class="n">NaN</span> <span class="ow">and</span> <span class="n">result</span> <span class="o">!=</span> <span class="n">infty</span> <span class="ow">and</span> <span class="n">result</span> <span class="o">!=</span> <span class="o">-</span><span class="n">infty</span><span class="p">:</span> <span class="k">break</span>
+    <span class="k">else</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Could not create random matrix&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">x</span>
+
+<span class="k">def</span> <span class="nf">does_not_throw</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span> <span class="k">return</span> <span class="o">-</span><span class="n">reduced</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span> <span class="k">return</span> <span class="n">NaN</span>
+</pre></div>
+</div>
+<p>Performs the minimization</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">math</span>
+<span class="n">methods</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;COBYLA&#39;</span><span class="p">,</span> <span class="s1">&#39;SLSQP&#39;</span><span class="p">]</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">random_starting_point</span><span class="p">()</span>
+<span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;x=&#39;</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span>
+<span class="n">maxx</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">reduced</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">methods</span><span class="p">)):</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">minimize</span><span class="p">(</span><span class="n">does_not_throw</span><span class="p">,</span>
+                      <span class="n">x</span><span class="p">,</span>
+                      <span class="n">method</span><span class="o">=</span><span class="n">methods</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                      <span class="n">constraints</span><span class="o">=</span><span class="n">constraints</span><span class="p">,</span>
+                      <span class="n">options</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;maxiter&#39;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span> <span class="s1">&#39;disp&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">})</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">fun</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">fun</span> <span class="o">&lt;</span> <span class="n">maxx</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="n">maxx</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">copy</span><span class="p">(),</span> <span class="n">result</span><span class="o">.</span><span class="n">fun</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">success</span> <span class="ow">and</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span> <span class="k">break</span>
+    <span class="n">x</span> <span class="o">+=</span>  <span class="n">random_starting_point</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">2</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">x</span><span class="p">)):</span> <span class="n">x</span> <span class="o">=</span> <span class="n">random_starting_point</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">maxx</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">maxx</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">-</span><span class="mf">795.0079187129502</span> <span class="p">[[</span> <span class="o">-</span><span class="mf">7.31733927e-01</span>   <span class="mf">5.73608232e-01</span>   <span class="mf">1.58125695e-01</span>   <span class="mf">0.00000000e+00</span>
+    <span class="mf">0.00000000e+00</span><span class="p">]</span>
+ <span class="p">[</span>  <span class="mf">5.13099956e+03</span>  <span class="o">-</span><span class="mf">5.13147159e+03</span>   <span class="mf">0.00000000e+00</span>   <span class="mf">4.72028553e-01</span>
+    <span class="mf">0.00000000e+00</span><span class="p">]</span>
+ <span class="p">[</span>  <span class="mf">5.34657910e-01</span>   <span class="mf">0.00000000e+00</span>  <span class="o">-</span><span class="mf">4.57912950e+03</span>   <span class="mf">2.82462703e+02</span>
+    <span class="mf">4.29613214e+03</span><span class="p">]</span>
+ <span class="p">[</span>  <span class="mf">0.00000000e+00</span>   <span class="mf">8.45220269e-01</span>   <span class="mf">2.92597166e-02</span>  <span class="o">-</span><span class="mf">8.74479986e-01</span>
+    <span class="mf">0.00000000e+00</span><span class="p">]</span>
+ <span class="p">[</span>  <span class="mf">0.00000000e+00</span>   <span class="mf">0.00000000e+00</span>   <span class="mf">1.57421312e-01</span>   <span class="mf">0.00000000e+00</span>
+   <span class="o">-</span><span class="mf">1.57421312e-01</span><span class="p">]]</span>
+<span class="n">x</span><span class="o">=</span> <span class="p">[</span>  <span class="mf">5.73608232e-01</span>   <span class="mf">1.58125695e-01</span>   <span class="mf">5.13099956e+03</span>   <span class="mf">4.72028553e-01</span>
+   <span class="mf">5.34657910e-01</span>   <span class="mf">2.82462703e+02</span>   <span class="mf">4.29613214e+03</span>   <span class="mf">8.45220269e-01</span>
+   <span class="mf">2.92597166e-02</span>   <span class="mf">1.57421312e-01</span><span class="p">]</span>
+     <span class="n">fun</span><span class="p">:</span> <span class="o">-</span><span class="mf">2150.8720254173086</span>
+   <span class="n">maxcv</span><span class="p">:</span> <span class="mf">5.1878344877524985e-16</span>
+ <span class="n">message</span><span class="p">:</span> <span class="s1">&#39;Maximum number of function evaluations has been exceeded.&#39;</span>
+    <span class="n">nfev</span><span class="p">:</span> <span class="mi">1000</span>
+  <span class="n">status</span><span class="p">:</span> <span class="mi">2</span>
+ <span class="n">success</span><span class="p">:</span> <span class="kc">False</span>
+       <span class="n">x</span><span class="p">:</span> <span class="n">array</span><span class="p">([</span>  <span class="mf">3.01358997e+00</span><span class="p">,</span>   <span class="mf">1.89327366e+02</span><span class="p">,</span>   <span class="mf">5.12972462e+03</span><span class="p">,</span>
+         <span class="mf">2.44890905e+01</span><span class="p">,</span>   <span class="mf">8.00417955e+02</span><span class="p">,</span>   <span class="mf">2.37558925e+02</span><span class="p">,</span>
+         <span class="mf">4.24260764e+03</span><span class="p">,</span>  <span class="o">-</span><span class="mf">5.18783449e-16</span><span class="p">,</span>   <span class="mf">3.93011670e+01</span><span class="p">,</span>
+         <span class="mf">1.32532752e+01</span><span class="p">])</span>
+<span class="o">-</span><span class="mf">2231.1152175140232</span> <span class="p">[[</span> <span class="o">-</span><span class="mf">1.11438201e+00</span>   <span class="mf">8.32376148e-01</span>   <span class="mf">2.82005864e-01</span>   <span class="mf">0.00000000e+00</span>
+    <span class="mf">0.00000000e+00</span><span class="p">]</span>
+ <span class="p">[</span>  <span class="mf">4.43631622e-01</span>  <span class="o">-</span><span class="mf">1.20756270e+00</span>   <span class="mf">0.00000000e+00</span>   <span class="mf">7.63931076e-01</span>
+    <span class="mf">0.00000000e+00</span><span class="p">]</span>
+ <span class="p">[</span>  <span class="mf">9.51457047e-01</span>   <span class="mf">0.00000000e+00</span>  <span class="o">-</span><span class="mf">1.29672622e+03</span>   <span class="mf">1.29508725e+03</span>
+    <span class="mf">6.87511017e-01</span><span class="p">]</span>
+ <span class="p">[</span>  <span class="mf">0.00000000e+00</span>   <span class="mf">7.89527185e+03</span>   <span class="mf">9.51068931e-01</span>  <span class="o">-</span><span class="mf">7.89622292e+03</span>
+    <span class="mf">0.00000000e+00</span><span class="p">]</span>
+ <span class="p">[</span>  <span class="mf">0.00000000e+00</span>   <span class="mf">0.00000000e+00</span>   <span class="mf">7.13307027e+03</span>   <span class="mf">0.00000000e+00</span>
+   <span class="o">-</span><span class="mf">7.13307027e+03</span><span class="p">]]</span>
+<span class="n">Iteration</span> <span class="n">limit</span> <span class="n">exceeded</span>    <span class="p">(</span><span class="n">Exit</span> <span class="n">mode</span> <span class="mi">9</span><span class="p">)</span>
+            <span class="n">Current</span> <span class="n">function</span> <span class="n">value</span><span class="p">:</span> <span class="n">nan</span>
+            <span class="n">Iterations</span><span class="p">:</span> <span class="mi">1001</span>
+            <span class="n">Function</span> <span class="n">evaluations</span><span class="p">:</span> <span class="mi">21639</span>
+            <span class="n">Gradient</span> <span class="n">evaluations</span><span class="p">:</span> <span class="mi">1001</span>
+     <span class="n">fun</span><span class="p">:</span> <span class="n">nan</span>
+     <span class="n">jac</span><span class="p">:</span> <span class="n">array</span><span class="p">([</span> <span class="n">nan</span><span class="p">,</span>  <span class="n">nan</span><span class="p">,</span>  <span class="n">nan</span><span class="p">,</span>  <span class="n">nan</span><span class="p">,</span>  <span class="n">nan</span><span class="p">,</span>  <span class="n">nan</span><span class="p">,</span>  <span class="n">nan</span><span class="p">,</span>  <span class="n">nan</span><span class="p">,</span>  <span class="n">nan</span><span class="p">,</span>  <span class="n">nan</span><span class="p">,</span>   <span class="mf">0.</span><span class="p">])</span>
+ <span class="n">message</span><span class="p">:</span> <span class="s1">&#39;Iteration limit exceeded&#39;</span>
+    <span class="n">nfev</span><span class="p">:</span> <span class="mi">21639</span>
+     <span class="n">nit</span><span class="p">:</span> <span class="mi">1001</span>
+    <span class="n">njev</span><span class="p">:</span> <span class="mi">1001</span>
+  <span class="n">status</span><span class="p">:</span> <span class="mi">9</span>
+ <span class="n">success</span><span class="p">:</span> <span class="kc">False</span>
+       <span class="n">x</span><span class="p">:</span> <span class="n">array</span><span class="p">([</span> <span class="n">nan</span><span class="p">,</span>  <span class="n">nan</span><span class="p">,</span>  <span class="n">nan</span><span class="p">,</span>  <span class="n">nan</span><span class="p">,</span>  <span class="n">nan</span><span class="p">,</span>  <span class="n">nan</span><span class="p">,</span>  <span class="n">nan</span><span class="p">,</span>  <span class="n">nan</span><span class="p">,</span>  <span class="n">nan</span><span class="p">,</span>  <span class="n">nan</span><span class="p">])</span>
+<span class="o">-</span><span class="mf">11800.651476936484</span> <span class="p">[[</span> <span class="o">-</span><span class="mf">8.76004244e+03</span>   <span class="mf">2.96504216e-01</span>   <span class="mf">8.75974593e+03</span>   <span class="mf">0.00000000e+00</span>
+    <span class="mf">0.00000000e+00</span><span class="p">]</span>
+ <span class="p">[</span>  <span class="mf">7.01352194e+03</span>  <span class="o">-</span><span class="mf">7.01410216e+03</span>   <span class="mf">0.00000000e+00</span>   <span class="mf">5.80220290e-01</span>
+    <span class="mf">0.00000000e+00</span><span class="p">]</span>
+ <span class="p">[</span>  <span class="mf">6.83310821e-01</span>   <span class="mf">0.00000000e+00</span>  <span class="o">-</span><span class="mf">1.59395396e+00</span>   <span class="mf">6.06206268e-01</span>
+    <span class="mf">3.04436871e-01</span><span class="p">]</span>
+ <span class="p">[</span>  <span class="mf">0.00000000e+00</span>   <span class="mf">2.14009497e-01</span>   <span class="mf">8.70868111e-01</span>  <span class="o">-</span><span class="mf">1.08487761e+00</span>
+    <span class="mf">0.00000000e+00</span><span class="p">]</span>
+ <span class="p">[</span>  <span class="mf">0.00000000e+00</span>   <span class="mf">0.00000000e+00</span>   <span class="mf">3.72315643e+03</span>   <span class="mf">0.00000000e+00</span>
+   <span class="o">-</span><span class="mf">3.72315643e+03</span><span class="p">]]</span>
+<span class="p">[</span>  <span class="mf">5.73608232e-01</span>   <span class="mf">1.58125695e-01</span>   <span class="mf">5.13099956e+03</span>   <span class="mf">4.72028553e-01</span>
+   <span class="mf">5.34657910e-01</span>   <span class="mf">2.82462703e+02</span>   <span class="mf">4.29613214e+03</span>   <span class="mf">8.45220269e-01</span>
+   <span class="mf">2.92597166e-02</span>   <span class="mf">1.57421312e-01</span><span class="p">]</span>
+<span class="o">-</span><span class="mf">2150.87202542</span>
+</pre></div>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="bottom navigation">
+      
+        <p>
+        «&#160;&#160;<a href="CH82.html">CH82 Model</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="CHSvectors.html">CHS vector</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2013-2016, University College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.
+    </div>
+  </body>
+</html>

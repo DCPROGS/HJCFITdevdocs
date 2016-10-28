@@ -1,0 +1,246 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Running HJCFIT on Archer: &#8212; HJCFIT 0.9 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="top" title="HJCFIT 0.9 documentation" href="../index.html" />
+    <link rel="up" title="Building and installing HJCFIT:" href="../install.html" />
+    <link rel="next" title="Building documentation:" href="documentation.html" />
+    <link rel="prev" title="Building and installing HJCFIT:" href="install.html" /> 
+  </head>
+  <body role="document">
+      <div class="header" role="banner"><h1 class="heading"><a href="../index.html">
+          <span>HJCFIT 0.9 documentation</span></a></h1>
+        <h2 class="heading"><span>Running HJCFIT on Archer:</span></h2>
+      </div>
+      <div class="topnav" role="navigation" aria-label="top navigation">
+      
+        <p>
+        «&#160;&#160;<a href="install.html">Building and installing HJCFIT:</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="documentation.html">Building documentation:</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="running-hjcfit-on-archer">
+<span id="runningonarcher"></span><h1>Running HJCFIT on Archer:<a class="headerlink" href="#running-hjcfit-on-archer" title="Permalink to this headline">¶</a></h1>
+<p>There&#8217;s good documentation about ARCHER on <a class="reference external" href="http://www.archer.ac.uk">their website</a>, but here&#8217;s an extract of what is useful for
+running HJCFIT on Archer.</p>
+<div class="section" id="filesystems">
+<h2>Filesystems<a class="headerlink" href="#filesystems" title="Permalink to this headline">¶</a></h2>
+<p>Once logged in ARCHER, there are two different filesystems we need to be aware of:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">/home</span></code>: This is the place were we land when logging in ARCHER. It is <strong>only
+visible from the login nodes and the MOM nodes</strong> (the ones that can run <code class="docutils literal"><span class="pre">aprun</span></code>
+and send tasks to the compute nodes). You should use this space for storing job
+files (PBS files), outputs and the like.</li>
+<li><code class="docutils literal"><span class="pre">/work</span></code>: This is <strong>visible from everywhere</strong>: login, MOM and compute nodes.
+You should use this for storing executable files that&#8217;ll be run by the compute
+nodes and other files that the compute nodes need to have access to when running
+those executables.</li>
+</ul>
+<p>Note we have a shared folder for RSDG and DCProgs team under
+<code class="docutils literal"><span class="pre">/work/ecse0506/ecse0506/shared</span></code> where we can place test data sets, etc.</p>
+</div>
+<div class="section" id="bashrc">
+<h2>.bashrc<a class="headerlink" href="#bashrc" title="Permalink to this headline">¶</a></h2>
+<p>To make your life easier, it is a good idea to add in your <cite>.bashrc</cite> two lines
+to create variables to move around the filesystem:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">WORK</span><span class="o">=</span>/work/ecse0506/ecse0506/<span class="nv">$USER</span>
+<span class="nb">export</span> <span class="nv">SHARED</span><span class="o">=</span>/work/ecse0506/ecse0506/shared
+</pre></div>
+</div>
+<p>You can also configure aliases, like:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">alias</span> <span class="nv">qu</span><span class="o">=</span><span class="s2">&quot;qstat -u </span><span class="nv">$USER</span><span class="s2">&quot;</span>
+</pre></div>
+</div>
+<p>And make the system put you on the $WORK filesystem from start, load a virtual
+environment or source a <a class="reference external" href="https://github.com/DCPROGS/HJCFIT/blob/develop/utils/archer/loadArcherModules.sh">script</a>
+to load all necessary modules to work on HJCFIT, so you don&#8217;t have to do it everytime
+you log into ARCHER. See a sample <cite>.bashrc</cite> <a class="reference external" href="https://github.com/DCPROGS/HJCFIT/blob/develop/utils/archer/sample_bashrc">here</a>.</p>
+</div>
+<div class="section" id="python-virtual-environment">
+<h2>Python Virtual Environment<a class="headerlink" href="#python-virtual-environment" title="Permalink to this headline">¶</a></h2>
+<p>To work with Python on ARCHER, we are using a virtual environment, which is the strategy recommended by ARCHER.</p>
+<p>To create it, you can run <a class="reference external" href="https://github.com/DCPROGS/HJCFIT/blob/develop/utils/archer/createVirtualEnv.sh">this script</a>
+that will install all the necessary packages to run HJCFIT in a virtual environment called <code class="docutils literal"><span class="pre">dcprogs</span></code>.</p>
+<p>You will also need to install any extra packages or projects you need, for example
+to work with DCPYPS, you&#8217;ll need to clone it and then install it:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">cd</span> <span class="nv">$WORK</span>
+pip install git+https://github.com/DCPROGS/DCPYPS.git
+</pre></div>
+</div>
+<p>Once the virtual environment is ready, you can activate or deactivate it with:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">source</span> activate dcprogs
+<span class="nb">source</span> deactivate dcprogs
+</pre></div>
+</div>
+</div>
+<div class="section" id="loging-in-to-archer-and-getting-hjcfit">
+<h2>Loging in to ARCHER and getting HJCFIT<a class="headerlink" href="#loging-in-to-archer-and-getting-hjcfit" title="Permalink to this headline">¶</a></h2>
+<p>Since we all have SAFE accounts configured for the project, we just need to do:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>ssh <span class="nv">$USER</span>@login.archer.ac.uk
+</pre></div>
+</div>
+<p>To get the code, build it and test it in the login node, do as usual for Unix systems:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>git clone -b develop https://github.com/DCPROGS/HJCFIT.git
+<span class="nb">cd</span> HJCFIT
+mkdir build
+<span class="nb">cd</span> build
+cmake ..
+make install
+make <span class="nb">test</span>
+</pre></div>
+</div>
+<p>Note that for this work, your <code class="docutils literal"><span class="pre">.bashrc</span></code> should have loaded all the necessary modules.
+See the <code class="docutils literal"><span class="pre">Environment</span></code> section.</p>
+</div>
+<div class="section" id="job-files">
+<h2>Job files<a class="headerlink" href="#job-files" title="Permalink to this headline">¶</a></h2>
+<p>Job scripts are written on a PBS file and follow a specific structure. Here&#8217;s a sample job script that runs a hello world bash script :</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash --login</span>
+
+<span class="c1">#PBS -N hello_archer</span>
+<span class="c1">#PBS -l select=1</span>
+<span class="c1">#PBS -l walltime=0:0:30</span>
+<span class="c1">#PBS -A $BUDGET</span>
+
+<span class="c1"># This shifts to the $WORK directory</span>
+<span class="nb">cd</span> <span class="nv">$WORK</span>
+
+aprun -n <span class="m">24</span> ./scripts/hello_archer.sh
+</pre></div>
+</div>
+<p>Job files need a few parameters to be set in the header of the PBS script:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">-N</span> <span class="pre">&lt;string&gt;`</span></code>: Specifies job name</li>
+<li><code class="docutils literal"><span class="pre">-l</span> <span class="pre">select=&lt;number&gt;`</span></code>: Number of nodes needed</li>
+<li><code class="docutils literal"><span class="pre">-l</span> <span class="pre">walltime=&lt;hours&gt;:&lt;minutes&gt;:&lt;seconds&gt;</span></code>: time requested for the job</li>
+<li><code class="docutils literal"><span class="pre">-A</span> <span class="pre">&lt;project_code&gt;</span></code>: budget code from where the used time will be subtracted</li>
+</ul>
+<p>The body of the job script <code class="docutils literal"><span class="pre">cd</span></code> to the <code class="docutils literal"><span class="pre">$WORK</span></code> folder where we have our
+executables and then uses <code class="docutils literal"><span class="pre">aprun</span></code> to execute the script in parallel using 24 nodes.</p>
+</div>
+<div class="section" id="submitting-a-job">
+<h2>Submitting a job<a class="headerlink" href="#submitting-a-job" title="Permalink to this headline">¶</a></h2>
+<p>To submit a job in the queue, you can do this:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>qsub myjobfile.pbs
+</pre></div>
+</div>
+<p>This will submit it to the general queue, and you can check its status with</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>qstat -u <span class="nv">$USER</span>
+</pre></div>
+</div>
+<p>Or</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>checkQueue
+</pre></div>
+</div>
+<p>To delete a job you have submitted:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>qdel &lt;job_ID_seen_in_queue&gt;
+</pre></div>
+</div>
+<p>Use <code class="docutils literal"><span class="pre">man</span> <span class="pre">qsub</span></code>, etc., for more info.</p>
+</div>
+<div class="section" id="queues">
+<h2>Queues<a class="headerlink" href="#queues" title="Permalink to this headline">¶</a></h2>
+<p>The <strong>standard queue</strong> takes sometimes too long for jobs to be run.</p>
+<p>From 9am to 5pm, Monday to Friday, there is a <strong>short queue</strong> available to run
+interactive jobs. You will land on a MOM node once you&#8217;ve launched the job, and
+will be able to run <code class="docutils literal"><span class="pre">aprun</span></code> that&#8217;ll trigger tasks in the compute nodes. This is
+very handy for short tests for example when testing project configuration. Jobs
+in this queue are restricted to 20 minutes walltime and a maximum of 8 nodes.
+This is the command you need to run:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>qsub -q short -IVl <span class="k">select</span><span class="o">=</span>1,walltime<span class="o">=</span>0:5:0 -A <span class="nv">$BUDGET</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">-q</span> <span class="pre">short</span></code>: Indicates we don&#8217;t want to use the standard queue, but the short one.</li>
+<li><code class="docutils literal"><span class="pre">-I</span></code> indicates the job is interactive.</li>
+<li><code class="docutils literal"><span class="pre">-V</span></code> exports the user&#8217;s environment (I think it runs ~/.bashrc)</li>
+<li><code class="docutils literal"><span class="pre">-l</span></code> followed by resource list:
+* <code class="docutils literal"><span class="pre">select=1</span></code> indicates one node will be used
+* <code class="docutils literal"><span class="pre">walltime:0:10:0</span></code> indicates 10 minutes of time available for our job
+* <code class="docutils literal"><span class="pre">-A</span> <span class="pre">$BUDGET</span></code> followed by project code indicates the budget the time/resources allocates should go to.</li>
+</ul>
+<p>In a short time, you&#8217;ll be on a <code class="docutils literal"><span class="pre">MOM</span></code> node and sent to your <code class="docutils literal"><span class="pre">$HOME</span></code> folder.
+Remember to cd to <code class="docutils literal"><span class="pre">$WORK</span></code> again, otherwise you can&#8217;t run <code class="docutils literal"><span class="pre">aprun</span></code>.</p>
+<p>Once there, you can do things like running a likelihood test in 4 nodes:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>aprun -n <span class="m">4</span> ./HJCFIT/build/likelihood/test_likelihood
+</pre></div>
+</div>
+<p>More on <code class="docutils literal"><span class="pre">aprun</span></code> <a class="reference external" href="http://www.archer.ac.uk/documentation/user-guide/batch.php#sec-5.4.2">here</a>.</p>
+<p>See other kinds of ARCHER queues <a class="reference external" href="http://www.archer.ac.uk/documentation/user-guide/batch.php#sec-5.8">here</a>.</p>
+</div>
+<div class="section" id="copying-files-to-and-from-archer">
+<h2>Copying files to and from ARCHER<a class="headerlink" href="#copying-files-to-and-from-archer" title="Permalink to this headline">¶</a></h2>
+<p>You might need to copy files to/from ARCHER. This can be done via <code class="docutils literal"><span class="pre">scp</span></code>, for example.
+See <a class="reference external" href="http://www.archer.ac.uk/documentation/transfer/#ARCHER_scp">ARCHER&#8217;s documentation</a>.</p>
+<p>Note that if you are on a <strong>Windows</strong> machine and want to run <code class="docutils literal"><span class="pre">scp</span></code> from the command line,
+you can use <a class="reference external" href="https://chocolatey.org">chocolatey</a> and install it like this:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>choco install win32-openssh
+</pre></div>
+</div>
+</div>
+<div class="section" id="virtualenvs-on-archer">
+<h2>Virtualenvs on archer.<a class="headerlink" href="#virtualenvs-on-archer" title="Permalink to this headline">¶</a></h2>
+<p>When running Anaconda python in a virtual env you may see something like.</p>
+<div class="highlight-none"><div class="highlight"><pre><span></span>python: error while loading shared libraries: libpython3.5m.so.1.0: cannot open shared object file: No such file or directory
+</pre></div>
+</div>
+<p>This happens because aprun copies python to the compute node. It breaks because
+the r path to <code class="docutils literal"><span class="pre">libpython3.5m.so.1.0</span></code> is is defined as <code class="docutils literal"><span class="pre">$ORIGIN/../lib/</span></code> and
+the linker resolves <code class="docutils literal"><span class="pre">$ORIGIN</span></code> to the directory where the executable is
+installed. You can prevent aprun from coping the executable by passing -b to it
+(see the aprun man page) Alternatively you can set LD_LIBRARY_PATH to help
+python find the library.</p>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="bottom navigation">
+      
+        <p>
+        «&#160;&#160;<a href="install.html">Building and installing HJCFIT:</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="documentation.html">Building documentation:</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2013-2016, University College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.
+    </div>
+  </body>
+</html>

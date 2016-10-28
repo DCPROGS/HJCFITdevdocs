@@ -1,0 +1,166 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Approx Survivor &#8212; HJCFIT 0.9 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="top" title="HJCFIT 0.9 documentation" href="../index.html" />
+    <link rel="up" title="Examples of the use of HJCFIT" href="../examples.html" />
+    <link rel="next" title="Asymptotic vs Exact for classic Matrix" href="asymptotes.html" />
+    <link rel="prev" title="Time series" href="TimeSeries.html" /> 
+  </head>
+  <body role="document">
+      <div class="header" role="banner"><h1 class="heading"><a href="../index.html">
+          <span>HJCFIT 0.9 documentation</span></a></h1>
+        <h2 class="heading"><span>Approx Survivor</span></h2>
+      </div>
+      <div class="topnav" role="navigation" aria-label="top navigation">
+      
+        <p>
+        «&#160;&#160;<a href="TimeSeries.html">Time series</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="asymptotes.html">Asymptotic vs Exact for classic Matrix</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="approx-survivor">
+<h1>Approx Survivor<a class="headerlink" href="#approx-survivor" title="Permalink to this headline">¶</a></h1>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
+</pre></div>
+</div>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+</pre></div>
+</div>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">numpy</span> <span class="k">import</span> <span class="n">array</span>
+<span class="kn">from</span> <span class="nn">dcprogs.likelihood</span> <span class="k">import</span> <span class="n">QMatrix</span><span class="p">,</span> <span class="n">DeterminantEq</span><span class="p">,</span> <span class="n">Asymptotes</span><span class="p">,</span> <span class="n">find_roots</span><span class="p">,</span> <span class="n">ExactSurvivor</span><span class="p">,</span> <span class="n">ApproxSurvivor</span>
+<span class="n">qmatrix</span> <span class="o">=</span> <span class="n">QMatrix</span><span class="p">(</span>
+           <span class="n">array</span><span class="p">([[</span> <span class="o">-</span><span class="mi">3050</span><span class="p">,</span>        <span class="mi">50</span><span class="p">,</span>  <span class="mi">3000</span><span class="p">,</span>      <span class="mi">0</span><span class="p">,</span>    <span class="mi">0</span> <span class="p">],</span>
+                  <span class="p">[</span> <span class="mf">2.</span><span class="o">/</span><span class="mf">3.</span><span class="p">,</span> <span class="o">-</span><span class="mf">1502.</span><span class="o">/</span><span class="mf">3.</span><span class="p">,</span>     <span class="mi">0</span><span class="p">,</span>    <span class="mi">500</span><span class="p">,</span>    <span class="mi">0</span> <span class="p">],</span>
+                  <span class="p">[</span>    <span class="mi">15</span><span class="p">,</span>         <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">2065</span><span class="p">,</span>     <span class="mi">50</span><span class="p">,</span> <span class="mi">2000</span> <span class="p">],</span>
+                  <span class="p">[</span>     <span class="mi">0</span><span class="p">,</span>     <span class="mi">15000</span><span class="p">,</span>  <span class="mi">4000</span><span class="p">,</span> <span class="o">-</span><span class="mi">19000</span><span class="p">,</span>    <span class="mi">0</span> <span class="p">],</span>
+                  <span class="p">[</span>     <span class="mi">0</span><span class="p">,</span>         <span class="mi">0</span><span class="p">,</span>    <span class="mi">10</span><span class="p">,</span>      <span class="mi">0</span><span class="p">,</span>  <span class="o">-</span><span class="mi">10</span> <span class="p">]</span> <span class="p">]),</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="n">transitions</span> <span class="o">=</span> <span class="n">qmatrix</span>
+<span class="n">tau</span> <span class="o">=</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">4</span>
+<span class="n">a</span> <span class="o">=</span> <span class="n">DeterminantEq</span><span class="p">(</span><span class="n">transitions</span><span class="p">,</span> <span class="n">tau</span><span class="p">)</span>
+<span class="n">approx</span> <span class="o">=</span> <span class="n">ApproxSurvivor</span><span class="p">(</span><span class="n">transitions</span><span class="p">,</span> <span class="n">tau</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">tau</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">4</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span>
+
+<span class="n">transitions</span> <span class="o">=</span> <span class="n">qmatrix</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+<span class="n">exact</span> <span class="o">=</span> <span class="n">ExactSurvivor</span><span class="p">(</span><span class="n">transitions</span><span class="p">,</span> <span class="n">tau</span><span class="p">)</span>
+<span class="n">approx</span> <span class="o">=</span> <span class="n">ApproxSurvivor</span><span class="p">(</span><span class="n">transitions</span><span class="p">,</span> <span class="n">tau</span><span class="p">)</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span> <span class="o">*</span> <span class="n">tau</span><span class="p">,</span> <span class="n">tau</span> <span class="o">/</span> <span class="mf">10.</span><span class="p">)</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">exact</span><span class="o">.</span><span class="n">af</span><span class="p">(</span><span class="n">x</span><span class="p">)[:,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;exact&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">approx</span><span class="o">.</span><span class="n">af</span><span class="p">(</span><span class="n">x</span><span class="p">)[:,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;approx&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Component $</span><span class="si">{0}</span><span class="s2">$ of the matrix $R_{{af}}$.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">((</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)))</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="../_images/approx_survivor_4_0.png" src="../_images/approx_survivor_4_0.png" />
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dcprogs.likelihood</span> <span class="k">import</span> <span class="n">MissedEventsG</span><span class="p">,</span> <span class="n">missed_events_pdf</span>
+
+<span class="n">tau</span> <span class="o">=</span> <span class="mi">2</span><span class="n">e</span><span class="o">-</span><span class="mi">4</span>
+<span class="n">x</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="o">*</span><span class="n">tau</span><span class="p">,</span> <span class="n">tau</span><span class="o">/</span><span class="mf">10.0</span><span class="p">),</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span>
+<span class="n">missedG</span> <span class="o">=</span> <span class="n">MissedEventsG</span><span class="p">(</span><span class="n">qmatrix</span><span class="p">,</span> <span class="n">tau</span><span class="p">)</span>
+<span class="n">pdf</span> <span class="o">=</span> <span class="n">missed_events_pdf</span><span class="p">(</span><span class="n">qmatrix</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">shut</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">missedG</span><span class="o">.</span><span class="n">fa</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+<span class="c1">#plot(x, [missedG.fa(u)[i, j] for u in x])</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">pdf</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+<span class="c1"># plot(x, missed_events_pdf(qmatrix, tau, shut=True)(x))</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[[</span> <span class="mf">0.</span>  <span class="mf">0.</span><span class="p">]</span>
+ <span class="p">[</span> <span class="mf">0.</span>  <span class="mf">0.</span><span class="p">]</span>
+ <span class="p">[</span> <span class="mf">0.</span>  <span class="mf">0.</span><span class="p">]]</span>
+</pre></div>
+</div>
+<img alt="../_images/approx_survivor_5_1.png" src="../_images/approx_survivor_5_1.png" />
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">create_derivative</span><span class="p">(</span><span class="n">qmatrix</span><span class="p">,</span> <span class="n">tau</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">dcprogs.likelihood</span> <span class="k">import</span> <span class="n">inv</span><span class="p">,</span> <span class="n">expm</span>
+
+    <span class="n">If</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">qmatrix</span><span class="o">.</span><span class="n">nshut</span><span class="p">)</span>
+    <span class="n">Ia</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">qmatrix</span><span class="o">.</span><span class="n">nopen</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">Xff</span><span class="p">(</span><span class="n">s</span><span class="p">):</span> <span class="k">return</span> <span class="n">s</span><span class="o">*</span><span class="n">If</span> <span class="o">-</span> <span class="n">qmatrix</span><span class="o">.</span><span class="n">ff</span>
+    <span class="k">def</span> <span class="nf">Sff</span><span class="p">(</span><span class="n">s</span><span class="p">):</span> <span class="k">return</span> <span class="n">If</span> <span class="o">-</span> <span class="n">expm</span><span class="p">(</span><span class="o">-</span><span class="n">tau</span><span class="o">*</span><span class="n">Xff</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">Gaf</span><span class="p">(</span><span class="n">s</span><span class="p">):</span> <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">inv</span><span class="p">(</span><span class="n">Xff</span><span class="p">(</span><span class="n">s</span><span class="p">)),</span> <span class="n">qmatrix</span><span class="o">.</span><span class="n">fa</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">derivative</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">Sff</span><span class="p">(</span><span class="n">s</span><span class="p">),</span> <span class="n">inv</span><span class="p">(</span><span class="n">Xff</span><span class="p">(</span><span class="n">s</span><span class="p">)))</span> <span class="o">-</span> <span class="n">tau</span> <span class="o">*</span> <span class="p">(</span><span class="n">If</span> <span class="o">-</span> <span class="n">Sff</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">Ia</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">qmatrix</span><span class="o">.</span><span class="n">af</span><span class="p">,</span> <span class="n">result</span><span class="p">),</span> <span class="n">Gaf</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">derivative</span>
+
+<span class="n">derivative</span> <span class="o">=</span> <span class="n">create_derivative</span><span class="p">(</span><span class="n">qmatrix</span><span class="p">,</span> <span class="n">tau</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">derivative</span><span class="p">(</span><span class="o">-</span><span class="mi">1000</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">()</span>
+<span class="n">determinant</span> <span class="o">=</span> <span class="n">DeterminantEq</span><span class="p">(</span><span class="n">qmatrix</span><span class="p">,</span> <span class="n">tau</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">determinant</span><span class="o">.</span><span class="n">s_derivative</span><span class="p">(</span><span class="o">-</span><span class="mi">1000</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">determinant</span><span class="o">.</span><span class="n">H</span><span class="p">(</span><span class="o">-</span><span class="mi">1000</span><span class="o">+</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">4</span><span class="p">)</span> <span class="o">-</span>  <span class="n">determinant</span><span class="o">.</span><span class="n">H</span><span class="p">(</span><span class="o">-</span><span class="mi">1000</span><span class="o">-</span><span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">4</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span><span class="n">e</span><span class="o">-</span><span class="mi">4</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">qmatrix</span><span class="o">.</span><span class="n">nopen</span><span class="p">)</span> <span class="o">-</span> <span class="n">determinant</span><span class="o">.</span><span class="n">s_derivative</span><span class="p">(</span><span class="o">-</span><span class="mi">1000</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[[</span>  <span class="mf">1.00078277e+00</span>   <span class="mf">1.95134590e-03</span><span class="p">]</span>
+ <span class="p">[</span>  <span class="mf">2.60179453e-05</span>   <span class="mf">1.02029429e+00</span><span class="p">]]</span>
+
+<span class="p">[[</span>  <span class="mf">1.00078277e+00</span>   <span class="mf">1.95134590e-03</span><span class="p">]</span>
+ <span class="p">[</span>  <span class="mf">2.60179453e-05</span>   <span class="mf">1.02029429e+00</span><span class="p">]]</span>
+<span class="p">[[</span> <span class="o">-</span><span class="mf">1.47868762e-09</span>  <span class="o">-</span><span class="mf">3.64861093e-12</span><span class="p">]</span>
+ <span class="p">[</span> <span class="o">-</span><span class="mf">2.78092880e-13</span>   <span class="mf">3.23290061e-10</span><span class="p">]]</span>
+</pre></div>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="bottom navigation">
+      
+        <p>
+        «&#160;&#160;<a href="TimeSeries.html">Time series</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="asymptotes.html">Asymptotic vs Exact for classic Matrix</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2013-2016, University College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.
+    </div>
+  </body>
+</html>

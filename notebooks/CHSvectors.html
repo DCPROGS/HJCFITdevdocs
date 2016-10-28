@@ -1,0 +1,161 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>CHS vector &#8212; HJCFIT 0.9 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="top" title="HJCFIT 0.9 documentation" href="../index.html" />
+    <link rel="up" title="Examples of the use of HJCFIT" href="../examples.html" />
+    <link rel="next" title="CKF Model" href="CKS.html" />
+    <link rel="prev" title="CH82 – optimization" href="CH82 -- optimization.html" /> 
+  </head>
+  <body role="document">
+      <div class="header" role="banner"><h1 class="heading"><a href="../index.html">
+          <span>HJCFIT 0.9 documentation</span></a></h1>
+        <h2 class="heading"><span>CHS vector</span></h2>
+      </div>
+      <div class="topnav" role="navigation" aria-label="top navigation">
+      
+        <p>
+        «&#160;&#160;<a href="CH82 -- optimization.html">CH82 &#8211; optimization</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="CKS.html">CKF Model</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="chs-vector">
+<h1>CHS vector<a class="headerlink" href="#chs-vector" title="Permalink to this headline">¶</a></h1>
+<p>First, create the <span class="math">\(Q\)</span>-matrix from the CH82 model.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
+</pre></div>
+</div>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+</pre></div>
+</div>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dcprogs.likelihood</span> <span class="k">import</span> <span class="n">QMatrix</span>
+
+<span class="n">tau</span> <span class="o">=</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">4</span>
+<span class="n">qmatrix</span> <span class="o">=</span> <span class="n">QMatrix</span><span class="p">([[</span> <span class="o">-</span><span class="mi">3050</span><span class="p">,</span>        <span class="mi">50</span><span class="p">,</span>  <span class="mi">3000</span><span class="p">,</span>      <span class="mi">0</span><span class="p">,</span>    <span class="mi">0</span> <span class="p">],</span>
+                   <span class="p">[</span> <span class="mf">2.</span><span class="o">/</span><span class="mf">3.</span><span class="p">,</span> <span class="o">-</span><span class="mf">1502.</span><span class="o">/</span><span class="mf">3.</span><span class="p">,</span>     <span class="mi">0</span><span class="p">,</span>    <span class="mi">500</span><span class="p">,</span>    <span class="mi">0</span> <span class="p">],</span>
+                   <span class="p">[</span>    <span class="mi">15</span><span class="p">,</span>         <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">2065</span><span class="p">,</span>     <span class="mi">50</span><span class="p">,</span> <span class="mi">2000</span> <span class="p">],</span>
+                   <span class="p">[</span>     <span class="mi">0</span><span class="p">,</span>     <span class="mi">15000</span><span class="p">,</span>  <span class="mi">4000</span><span class="p">,</span> <span class="o">-</span><span class="mi">19000</span><span class="p">,</span>    <span class="mi">0</span> <span class="p">],</span>
+                   <span class="p">[</span>     <span class="mi">0</span><span class="p">,</span>         <span class="mi">0</span><span class="p">,</span>    <span class="mi">10</span><span class="p">,</span>      <span class="mi">0</span><span class="p">,</span>  <span class="o">-</span><span class="mi">10</span> <span class="p">]</span> <span class="p">],</span> <span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Then create the missed-events likelihood function <span class="math">\(^{e}G\)</span> from
+which the CHS vectors can be found. We compare the vectors to prior
+results.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dcprogs.likelihood</span> <span class="k">import</span> <span class="n">MissedEventsG</span>
+
+<span class="n">eG</span> <span class="o">=</span> <span class="n">MissedEventsG</span><span class="p">(</span><span class="n">qmatrix</span><span class="p">,</span> <span class="n">tau</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">eG</span><span class="o">.</span><span class="n">initial_CHS_occupancies</span><span class="p">(</span><span class="mi">4</span><span class="n">e</span><span class="o">-</span><span class="mi">3</span><span class="p">)</span> <span class="o">-</span> <span class="p">[</span><span class="mf">0.220418</span><span class="p">,</span> <span class="mf">0.779582</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">eG</span><span class="o">.</span><span class="n">final_CHS_occupancies</span><span class="p">(</span><span class="mi">4</span><span class="n">e</span><span class="o">-</span><span class="mi">3</span><span class="p">)</span> <span class="o">-</span> <span class="p">[</span><span class="mf">0.974852</span><span class="p">,</span> <span class="mf">0.21346</span><span class="p">,</span> <span class="mf">0.999179</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">np</span><span class="o">.</span><span class="n">set_printoptions</span><span class="p">(</span><span class="n">precision</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="o">*</span><span class="n">tau</span><span class="p">,</span> <span class="n">tau</span><span class="o">/</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="mi">1</span><span class="n">e3</span><span class="p">,</span> <span class="p">[</span><span class="n">eG</span><span class="o">.</span><span class="n">initial_CHS_occupancies</span><span class="p">(</span><span class="n">u</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">x</span><span class="p">])</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;$t_{\mathrm</span><span class="si">{crit}</span><span class="s1">}$ (ms)&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Components of the initial CHS vector $\phi_A$&#39;</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="mi">1</span><span class="n">e3</span><span class="p">,</span> <span class="p">[</span><span class="n">eG</span><span class="o">.</span><span class="n">final_CHS_occupancies</span><span class="p">(</span><span class="n">u</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">x</span><span class="p">])</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;$t_{\mathrm</span><span class="si">{crit}</span><span class="s1">}$ (ms)&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Components of the final CHS vector $e_F$&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">tick_right</span><span class="p">()</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_label_position</span><span class="p">(</span><span class="s2">&quot;right&quot;</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="../_images/CHSvectors_7_0.png" src="../_images/CHSvectors_7_0.png" />
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">qmatrix</span> <span class="o">=</span> <span class="n">QMatrix</span><span class="p">([[</span> <span class="o">-</span><span class="mi">3050</span><span class="p">,</span>        <span class="mi">50</span><span class="p">,</span>  <span class="mi">3000</span><span class="p">,</span>      <span class="mi">0</span><span class="p">,</span>    <span class="mi">0</span> <span class="p">],</span>
+                   <span class="p">[</span> <span class="mf">2.</span><span class="o">/</span><span class="mf">3.</span><span class="p">,</span> <span class="o">-</span><span class="mf">1502.</span><span class="o">/</span><span class="mf">3.</span><span class="p">,</span>     <span class="mi">0</span><span class="p">,</span>    <span class="mi">500</span><span class="p">,</span>    <span class="mi">0</span> <span class="p">],</span>
+                   <span class="p">[</span>    <span class="mi">15</span><span class="p">,</span>         <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">2065</span><span class="p">,</span>     <span class="mi">50</span><span class="p">,</span> <span class="mi">2000</span> <span class="p">],</span>
+                   <span class="p">[</span>     <span class="mi">0</span><span class="p">,</span>     <span class="mi">15000</span><span class="p">,</span>  <span class="mi">4000</span><span class="p">,</span> <span class="o">-</span><span class="mi">19000</span><span class="p">,</span>    <span class="mi">0</span> <span class="p">],</span>
+                   <span class="p">[</span>     <span class="mi">0</span><span class="p">,</span>         <span class="mi">0</span><span class="p">,</span>    <span class="mi">10</span><span class="p">,</span>      <span class="mi">0</span><span class="p">,</span>  <span class="o">-</span><span class="mi">10</span> <span class="p">]</span> <span class="p">],</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">qmatrix</span><span class="o">.</span><span class="n">matrix</span> <span class="o">/=</span> <span class="mi">1</span><span class="n">e3</span>
+<span class="n">eG</span> <span class="o">=</span> <span class="n">MissedEventsG</span><span class="p">(</span><span class="n">qmatrix</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">eG</span><span class="o">.</span><span class="n">initial_CHS_occupancies</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">eG</span><span class="o">.</span><span class="n">final_CHS_occupancies</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[[</span> <span class="mf">0.17394315362718</span>  <span class="mf">0.82605684637282</span><span class="p">]]</span>
+<span class="p">[</span> <span class="mf">0.976491211386196</span>  <span class="mf">0.222305380522348</span>  <span class="mf">0.999257244552635</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">qmatrix</span> <span class="o">=</span> <span class="n">QMatrix</span><span class="p">([[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">19</span><span class="p">,</span> <span class="o">-</span><span class="mi">29</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.026</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.026</span><span class="p">]],</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">eG</span> <span class="o">=</span> <span class="n">MissedEventsG</span><span class="p">(</span><span class="n">qmatrix</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">eG</span><span class="o">.</span><span class="n">initial_CHS_occupancies</span><span class="p">(</span><span class="mf">0.2</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">eG</span><span class="o">.</span><span class="n">final_CHS_occupancies</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span> <span class="mf">1.</span><span class="p">]</span>
+<span class="p">[</span> <span class="mf">0.369080824446409</span>  <span class="mf">0.942440306684312</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">qmatrix</span> <span class="o">=</span> <span class="n">QMatrix</span><span class="p">([</span> <span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span>    <span class="mi">1</span><span class="p">,</span>   <span class="mi">1</span><span class="p">,</span>    <span class="mi">0</span><span class="p">],</span>
+                    <span class="p">[</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">101</span><span class="p">,</span>   <span class="mi">0</span><span class="p">,</span>  <span class="mi">100</span><span class="p">],</span>
+                    <span class="p">[</span><span class="mi">50</span><span class="p">,</span>    <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">50</span><span class="p">,</span>    <span class="mi">0</span><span class="p">],</span>
+                    <span class="p">[</span> <span class="mi">0</span><span class="p">,</span>  <span class="mf">5.6</span><span class="p">,</span>   <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">5.6</span><span class="p">]],</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">eG</span> <span class="o">=</span> <span class="n">MissedEventsG</span><span class="p">(</span><span class="n">qmatrix</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">eG</span><span class="o">.</span><span class="n">initial_CHS_occupancies</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">eG</span><span class="o">.</span><span class="n">final_CHS_occupancies</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[</span> <span class="mf">1.</span><span class="p">]</span>
+<span class="p">[</span> <span class="mf">0.846530054887703</span>  <span class="mf">0.168045183806245</span>  <span class="mf">0.852959014045745</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="bottom navigation">
+      
+        <p>
+        «&#160;&#160;<a href="CH82 -- optimization.html">CH82 &#8211; optimization</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="CKS.html">CKF Model</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2013-2016, University College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.
+    </div>
+  </body>
+</html>

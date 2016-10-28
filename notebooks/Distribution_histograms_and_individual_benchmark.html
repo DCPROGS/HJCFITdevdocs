@@ -1,0 +1,299 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Distribution histograms and individual benchmarks &#8212; HJCFIT 0.9 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="top" title="HJCFIT 0.9 documentation" href="../index.html" />
+    <link rel="up" title="Examples of the use of HJCFIT" href="../examples.html" />
+    <link rel="next" title="HJCFIT- maximum likelihood fit of single-channel data: a simple example" href="Example_MLL_Fit_AChR_1patch.html" />
+    <link rel="prev" title="CKF Model" href="CKS.html" /> 
+  </head>
+  <body role="document">
+      <div class="header" role="banner"><h1 class="heading"><a href="../index.html">
+          <span>HJCFIT 0.9 documentation</span></a></h1>
+        <h2 class="heading"><span>Distribution histograms and individual benchmarks</span></h2>
+      </div>
+      <div class="topnav" role="navigation" aria-label="top navigation">
+      
+        <p>
+        «&#160;&#160;<a href="CKS.html">CKF Model</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="Example_MLL_Fit_AChR_1patch.html">HJCFIT- maximum likelihood fit of single-channel data: a simple example</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="distribution-histograms-and-individual-benchmarks">
+<h1>Distribution histograms and individual benchmarks<a class="headerlink" href="#distribution-histograms-and-individual-benchmarks" title="Permalink to this headline">¶</a></h1>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
+</pre></div>
+</div>
+<p>This notebook mainly serves to extract data used for the Archer eCSE
+report.</p>
+<p>Set the number of OpenMP threads to use. Note that the number of threads
+is fixed at import time of DCPROGS so you will need to change restart
+the notebook and reexecute from the begining for any changes to take
+effect.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;OMP_NUM_THREADS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;1&#39;</span>
+</pre></div>
+</div>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">matplotlib.text</span> <span class="k">as</span> <span class="nn">mtext</span>
+</pre></div>
+</div>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="k">import</span> <span class="n">minimize</span>
+
+<span class="kn">from</span> <span class="nn">dcpyps</span> <span class="k">import</span> <span class="n">dcio</span>
+<span class="kn">from</span> <span class="nn">dcpyps</span> <span class="k">import</span> <span class="n">dataset</span>
+<span class="kn">from</span> <span class="nn">dcpyps</span> <span class="k">import</span> <span class="n">mechanism</span>
+<span class="kn">from</span> <span class="nn">dcprogs.likelihood</span> <span class="k">import</span> <span class="n">Log10Likelihood</span>
+
+<span class="c1"># LOAD DATA: Burzomato 2004 example set.</span>
+<span class="n">scnfiles</span> <span class="o">=</span> <span class="p">[[</span><span class="s2">&quot;./samples/glydemo/A-10.scn&quot;</span><span class="p">],</span>
+            <span class="p">[</span><span class="s2">&quot;./samples/glydemo/B-30.scn&quot;</span><span class="p">],</span>
+            <span class="p">[</span><span class="s2">&quot;./samples/glydemo/C-100.scn&quot;</span><span class="p">],</span>
+            <span class="p">[</span><span class="s2">&quot;./samples/glydemo/D-1000.scn&quot;</span><span class="p">]]</span>
+<span class="n">tres</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.000030</span><span class="p">,</span> <span class="mf">0.000030</span><span class="p">,</span> <span class="mf">0.000030</span><span class="p">,</span> <span class="mf">0.000030</span><span class="p">]</span>
+<span class="n">tcrit</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.004</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.06</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.02</span><span class="p">]</span>
+<span class="n">conc</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="n">e</span><span class="o">-</span><span class="mi">6</span><span class="p">,</span> <span class="mi">30</span><span class="n">e</span><span class="o">-</span><span class="mi">6</span><span class="p">,</span> <span class="mi">100</span><span class="n">e</span><span class="o">-</span><span class="mi">6</span><span class="p">,</span> <span class="mi">1000</span><span class="n">e</span><span class="o">-</span><span class="mi">6</span><span class="p">]</span>
+
+<span class="n">recs</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">bursts</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">scnfiles</span><span class="p">)):</span>
+    <span class="n">rec</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">SCRecord</span><span class="p">(</span><span class="n">scnfiles</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">conc</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">tres</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">tcrit</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="n">rec</span><span class="o">.</span><span class="n">record_type</span> <span class="o">=</span> <span class="s1">&#39;recorded&#39;</span>
+    <span class="n">recs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rec</span><span class="p">)</span>
+    <span class="n">bursts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rec</span><span class="o">.</span><span class="n">bursts</span><span class="o">.</span><span class="n">intervals</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">n_experiments</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">recs</span><span class="p">)</span>
+<span class="n">openings</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">opening_dists</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">n_bursts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">rec</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">recs</span><span class="p">):</span>
+    <span class="n">n_bursts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">rec</span><span class="o">.</span><span class="n">bursts</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+    <span class="n">openings</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">rec</span><span class="o">.</span><span class="n">bursts</span><span class="o">.</span><span class="n">count</span><span class="p">())</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">burst</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">rec</span><span class="o">.</span><span class="n">bursts</span><span class="o">.</span><span class="n">all</span><span class="p">()):</span>
+        <span class="n">openings</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">burst</span><span class="o">.</span><span class="n">get_openings_number</span><span class="p">()</span>
+    <span class="n">opening_dists</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">openings</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Plot the distribution of bursts within the 4 different experiments
+showing how number of bursts corelate with the lenght of the bursts.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_experiments</span><span class="p">):</span>
+    <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">opening_dists</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">bins</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">ax</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Exp: </span><span class="si">{}</span><span class="s2"> N Bursts: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">n_bursts</span><span class="p">[</span><span class="n">i</span><span class="p">])),</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">ylabel</span> <span class="o">=</span> <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Number of bursts&#39;</span><span class="p">)</span>
+<span class="n">ylabel</span> <span class="o">=</span> <span class="n">ax</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Number of bursts&#39;</span><span class="p">)</span>
+<span class="n">xlabel</span> <span class="o">=</span> <span class="n">ax</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Openings in burst&#39;</span><span class="p">)</span>
+<span class="n">xlabel</span> <span class="o">=</span> <span class="n">ax</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Openings in burst&#39;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">(</span><span class="n">w_pad</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">h_pad</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../_images/Distribution_histograms_and_individual_benchmark_9_0.png" src="../_images/Distribution_histograms_and_individual_benchmark_9_0.png" />
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="c1"># LOAD FLIP MECHANISM USED Burzomato et al 2004</span>
+<span class="n">mecfn</span> <span class="o">=</span> <span class="s2">&quot;./samples/mec/demomec.mec&quot;</span>
+<span class="n">version</span><span class="p">,</span> <span class="n">meclist</span><span class="p">,</span> <span class="n">max_mecnum</span> <span class="o">=</span> <span class="n">dcio</span><span class="o">.</span><span class="n">mec_get_list</span><span class="p">(</span><span class="n">mecfn</span><span class="p">)</span>
+<span class="n">mec</span> <span class="o">=</span> <span class="n">dcio</span><span class="o">.</span><span class="n">mec_load</span><span class="p">(</span><span class="n">mecfn</span><span class="p">,</span> <span class="n">meclist</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="c1"># PREPARE RATE CONSTANTS.</span>
+<span class="n">rates</span> <span class="o">=</span> <span class="p">[</span><span class="mf">4500.0</span><span class="p">,</span> <span class="mf">700.0</span><span class="p">,</span> <span class="mf">2500.0</span><span class="p">,</span> <span class="mf">1800.0</span><span class="p">,</span> <span class="mf">900.0</span><span class="p">,</span> <span class="mf">18000.0</span><span class="p">,</span> <span class="mf">200.0</span><span class="p">,</span> <span class="mf">0.1100E+06</span><span class="p">,</span> <span class="mf">4900.0</span><span class="p">,</span> <span class="mf">0.4000E+09</span><span class="p">,</span> <span class="mf">1850.0</span><span class="p">,</span> <span class="mf">10000.0</span><span class="p">,</span> <span class="mf">5000.0</span><span class="p">,</span> <span class="mf">0.7500E+09</span><span class="p">,</span> <span class="mf">8500.0</span><span class="p">,</span> <span class="mf">1050.0</span><span class="p">,</span> <span class="mf">3500.0</span><span class="p">,</span> <span class="mf">0.5000E+07</span><span class="p">,</span> <span class="mf">2300.0</span><span class="p">,</span> <span class="mf">0.9500E+07</span><span class="p">,</span> <span class="mi">1950</span><span class="p">,</span> <span class="mf">0.130000E+08</span><span class="p">]</span>
+
+<span class="n">mec</span><span class="o">.</span><span class="n">set_rateconstants</span><span class="p">(</span><span class="n">rates</span><span class="p">)</span>
+
+<span class="c1"># Fixed rates.</span>
+<span class="c1">#fixed = np.array([False, False, False, False, False, False, False, True,</span>
+<span class="c1">#    False, False, False, False, False, False])</span>
+<span class="c1">#if fixed.size == len(mec.Rates):</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mec</span><span class="o">.</span><span class="n">Rates</span><span class="p">)):</span>
+    <span class="n">mec</span><span class="o">.</span><span class="n">Rates</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">fixed</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="c1"># Constrained rates.</span>
+<span class="n">mec</span><span class="o">.</span><span class="n">Rates</span><span class="p">[</span><span class="mi">21</span><span class="p">]</span><span class="o">.</span><span class="n">is_constrained</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">mec</span><span class="o">.</span><span class="n">Rates</span><span class="p">[</span><span class="mi">21</span><span class="p">]</span><span class="o">.</span><span class="n">constrain_func</span> <span class="o">=</span> <span class="n">mechanism</span><span class="o">.</span><span class="n">constrain_rate_multiple</span>
+<span class="n">mec</span><span class="o">.</span><span class="n">Rates</span><span class="p">[</span><span class="mi">21</span><span class="p">]</span><span class="o">.</span><span class="n">constrain_args</span> <span class="o">=</span> <span class="p">[</span><span class="mi">17</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+<span class="n">mec</span><span class="o">.</span><span class="n">Rates</span><span class="p">[</span><span class="mi">19</span><span class="p">]</span><span class="o">.</span><span class="n">is_constrained</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">mec</span><span class="o">.</span><span class="n">Rates</span><span class="p">[</span><span class="mi">19</span><span class="p">]</span><span class="o">.</span><span class="n">constrain_func</span> <span class="o">=</span> <span class="n">mechanism</span><span class="o">.</span><span class="n">constrain_rate_multiple</span>
+<span class="n">mec</span><span class="o">.</span><span class="n">Rates</span><span class="p">[</span><span class="mi">19</span><span class="p">]</span><span class="o">.</span><span class="n">constrain_args</span> <span class="o">=</span> <span class="p">[</span><span class="mi">17</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="n">mec</span><span class="o">.</span><span class="n">Rates</span><span class="p">[</span><span class="mi">16</span><span class="p">]</span><span class="o">.</span><span class="n">is_constrained</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">mec</span><span class="o">.</span><span class="n">Rates</span><span class="p">[</span><span class="mi">16</span><span class="p">]</span><span class="o">.</span><span class="n">constrain_func</span> <span class="o">=</span> <span class="n">mechanism</span><span class="o">.</span><span class="n">constrain_rate_multiple</span>
+<span class="n">mec</span><span class="o">.</span><span class="n">Rates</span><span class="p">[</span><span class="mi">16</span><span class="p">]</span><span class="o">.</span><span class="n">constrain_args</span> <span class="o">=</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+<span class="n">mec</span><span class="o">.</span><span class="n">Rates</span><span class="p">[</span><span class="mi">18</span><span class="p">]</span><span class="o">.</span><span class="n">is_constrained</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">mec</span><span class="o">.</span><span class="n">Rates</span><span class="p">[</span><span class="mi">18</span><span class="p">]</span><span class="o">.</span><span class="n">constrain_func</span> <span class="o">=</span> <span class="n">mechanism</span><span class="o">.</span><span class="n">constrain_rate_multiple</span>
+<span class="n">mec</span><span class="o">.</span><span class="n">Rates</span><span class="p">[</span><span class="mi">18</span><span class="p">]</span><span class="o">.</span><span class="n">constrain_args</span> <span class="o">=</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="n">mec</span><span class="o">.</span><span class="n">Rates</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span><span class="o">.</span><span class="n">is_constrained</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">mec</span><span class="o">.</span><span class="n">Rates</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span><span class="o">.</span><span class="n">constrain_func</span> <span class="o">=</span> <span class="n">mechanism</span><span class="o">.</span><span class="n">constrain_rate_multiple</span>
+<span class="n">mec</span><span class="o">.</span><span class="n">Rates</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span><span class="o">.</span><span class="n">constrain_args</span> <span class="o">=</span> <span class="p">[</span><span class="mi">12</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">]</span>
+<span class="n">mec</span><span class="o">.</span><span class="n">Rates</span><span class="p">[</span><span class="mi">13</span><span class="p">]</span><span class="o">.</span><span class="n">is_constrained</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">mec</span><span class="o">.</span><span class="n">Rates</span><span class="p">[</span><span class="mi">13</span><span class="p">]</span><span class="o">.</span><span class="n">constrain_func</span> <span class="o">=</span> <span class="n">mechanism</span><span class="o">.</span><span class="n">constrain_rate_multiple</span>
+<span class="n">mec</span><span class="o">.</span><span class="n">Rates</span><span class="p">[</span><span class="mi">13</span><span class="p">]</span><span class="o">.</span><span class="n">constrain_args</span> <span class="o">=</span> <span class="p">[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="n">mec</span><span class="o">.</span><span class="n">update_constrains</span><span class="p">()</span>
+
+<span class="n">mec</span><span class="o">.</span><span class="n">set_mr</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">mec</span><span class="o">.</span><span class="n">set_mr</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="n">mec</span><span class="o">.</span><span class="n">printout</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+<span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">mec</span><span class="o">.</span><span class="n">theta</span><span class="p">())</span>
+
+<span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;nmax&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;xtol&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">12</span><span class="p">,</span> <span class="s1">&#39;rtol&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">12</span><span class="p">,</span> <span class="s1">&#39;itermax&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="s1">&#39;lower_bound&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="n">e6</span><span class="p">,</span> <span class="s1">&#39;upper_bound&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+<span class="n">likelihood</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">recs</span><span class="p">)):</span>
+    <span class="n">likelihood</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Log10Likelihood</span><span class="p">(</span><span class="n">bursts</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">mec</span><span class="o">.</span><span class="n">kA</span><span class="p">,</span>
+        <span class="n">recs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">tres</span><span class="p">,</span> <span class="n">recs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">tcrit</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">dcprogslik</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">mec</span><span class="o">.</span><span class="n">theta_unsqueeze</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+    <span class="n">lik</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">conc</span><span class="p">)):</span>
+        <span class="n">mec</span><span class="o">.</span><span class="n">set_eff</span><span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">conc</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">lik</span> <span class="o">+=</span> <span class="o">-</span><span class="n">likelihood</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="n">mec</span><span class="o">.</span><span class="n">Q</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">lik</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">dcpyps</span><span class="o">.</span><span class="n">Mechanism</span>
+<span class="n">Values</span> <span class="n">of</span> <span class="n">unit</span> <span class="n">rates</span> <span class="p">[</span><span class="mi">1</span><span class="o">/</span><span class="n">sec</span><span class="p">]:</span>
+<span class="mi">0</span>   <span class="n">From</span> <span class="n">AF</span><span class="o">*</span>        <span class="n">to</span> <span class="n">AF</span>           <span class="n">alpha1</span>          <span class="mf">4500.0</span>
+<span class="mi">1</span>   <span class="n">From</span> <span class="n">AF</span>         <span class="n">to</span> <span class="n">AF</span><span class="o">*</span>          <span class="n">beta1</span>           <span class="mf">700.0</span>
+<span class="mi">2</span>   <span class="n">From</span> <span class="n">A2F</span><span class="o">*</span>       <span class="n">to</span> <span class="n">A2F</span>          <span class="n">alpha2</span>          <span class="mf">2500.0</span>
+<span class="mi">3</span>   <span class="n">From</span> <span class="n">A2F</span>        <span class="n">to</span> <span class="n">A2F</span><span class="o">*</span>         <span class="n">beta2</span>           <span class="mf">1800.0</span>
+<span class="mi">4</span>   <span class="n">From</span> <span class="n">A3F</span><span class="o">*</span>       <span class="n">to</span> <span class="n">A3F</span>          <span class="n">alpha3</span>          <span class="mf">900.0</span>
+<span class="mi">5</span>   <span class="n">From</span> <span class="n">A3F</span>        <span class="n">to</span> <span class="n">A3F</span><span class="o">*</span>         <span class="n">beta3</span>           <span class="mf">18000.0</span>
+<span class="mi">6</span>   <span class="n">From</span> <span class="n">A3F</span>        <span class="n">to</span> <span class="n">A3R</span>          <span class="n">gama3</span>           <span class="mf">200.0</span>
+<span class="mi">7</span>   <span class="n">From</span> <span class="n">A3R</span>        <span class="n">to</span> <span class="n">A3F</span>          <span class="n">delta3</span>          <span class="mf">67459.4594595</span>
+<span class="mi">8</span>   <span class="n">From</span> <span class="n">A3F</span>        <span class="n">to</span> <span class="n">A2F</span>          <span class="mi">3</span><span class="n">kf</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">)</span>         <span class="mf">7500.0</span>
+<span class="mi">9</span>   <span class="n">From</span> <span class="n">A2F</span>        <span class="n">to</span> <span class="n">A3F</span>          <span class="n">kf</span><span class="p">(</span><span class="o">+</span><span class="mi">3</span><span class="p">)</span>          <span class="mf">400000000.0</span>
+<span class="mi">10</span>  <span class="n">From</span> <span class="n">A2F</span>        <span class="n">to</span> <span class="n">A2R</span>          <span class="n">gama2</span>           <span class="mf">1850.0</span>
+<span class="mi">11</span>  <span class="n">From</span> <span class="n">A2R</span>        <span class="n">to</span> <span class="n">A2F</span>          <span class="n">delta2</span>          <span class="mf">10000.0</span>
+<span class="mi">12</span>  <span class="n">From</span> <span class="n">A2F</span>        <span class="n">to</span> <span class="n">AF</span>           <span class="mi">2</span><span class="n">kf</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>         <span class="mf">5000.0</span>
+<span class="mi">13</span>  <span class="n">From</span> <span class="n">AF</span>         <span class="n">to</span> <span class="n">A2F</span>          <span class="mi">2</span><span class="n">kf</span><span class="p">(</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span>         <span class="mf">800000000.0</span>
+<span class="mi">14</span>  <span class="n">From</span> <span class="n">AF</span>         <span class="n">to</span> <span class="n">AR</span>           <span class="n">gama1</span>           <span class="mf">8500.0</span>
+<span class="mi">15</span>  <span class="n">From</span> <span class="n">AR</span>         <span class="n">to</span> <span class="n">AF</span>           <span class="n">delta1</span>          <span class="mf">736.313236313</span>
+<span class="mi">16</span>  <span class="n">From</span> <span class="n">A3R</span>        <span class="n">to</span> <span class="n">A2R</span>          <span class="mi">3</span><span class="n">k</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">)</span>          <span class="mi">5850</span>
+<span class="mi">17</span>  <span class="n">From</span> <span class="n">A2R</span>        <span class="n">to</span> <span class="n">A3R</span>          <span class="n">k</span><span class="p">(</span><span class="o">+</span><span class="mi">3</span><span class="p">)</span>           <span class="mf">5000000.0</span>
+<span class="mi">18</span>  <span class="n">From</span> <span class="n">A2R</span>        <span class="n">to</span> <span class="n">AR</span>           <span class="mi">2</span><span class="n">k</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>          <span class="mi">3900</span>
+<span class="mi">19</span>  <span class="n">From</span> <span class="n">AR</span>         <span class="n">to</span> <span class="n">A2R</span>          <span class="mi">2</span><span class="n">k</span><span class="p">(</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span>          <span class="mf">10000000.0</span>
+<span class="mi">20</span>  <span class="n">From</span> <span class="n">AR</span>         <span class="n">to</span> <span class="n">R</span>            <span class="n">k</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>           <span class="mi">1950</span>
+<span class="mi">21</span>  <span class="n">From</span> <span class="n">R</span>          <span class="n">to</span> <span class="n">AR</span>           <span class="mi">3</span><span class="n">k</span><span class="p">(</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>          <span class="mf">15000000.0</span>
+
+<span class="n">Conductance</span> <span class="n">of</span> <span class="n">state</span> <span class="n">AF</span><span class="o">*</span> <span class="p">(</span><span class="n">pS</span><span class="p">)</span>  <span class="o">=</span>      <span class="mi">40</span>
+
+<span class="n">Conductance</span> <span class="n">of</span> <span class="n">state</span> <span class="n">A2F</span><span class="o">*</span> <span class="p">(</span><span class="n">pS</span><span class="p">)</span>  <span class="o">=</span>      <span class="mi">40</span>
+
+<span class="n">Conductance</span> <span class="n">of</span> <span class="n">state</span> <span class="n">A3F</span><span class="o">*</span> <span class="p">(</span><span class="n">pS</span><span class="p">)</span>  <span class="o">=</span>      <span class="mi">40</span>
+
+<span class="n">Number</span> <span class="n">of</span> <span class="nb">open</span> <span class="n">states</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">Number</span> <span class="n">of</span> <span class="n">short</span><span class="o">-</span><span class="n">lived</span> <span class="n">shut</span> <span class="n">states</span> <span class="p">(</span><span class="n">within</span> <span class="n">burst</span><span class="p">)</span> <span class="o">=</span> <span class="mi">6</span>
+<span class="n">Number</span> <span class="n">of</span> <span class="n">long</span><span class="o">-</span><span class="n">lived</span> <span class="n">shut</span> <span class="n">states</span> <span class="p">(</span><span class="n">between</span> <span class="n">bursts</span><span class="p">)</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">Number</span> <span class="n">of</span> <span class="n">desensitised</span> <span class="n">states</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="n">Number</span> <span class="n">of</span> <span class="n">cycles</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">Cycle</span> <span class="mi">0</span> <span class="ow">is</span> <span class="n">formed</span> <span class="n">of</span> <span class="n">states</span><span class="p">:</span> <span class="n">A3R</span>  <span class="n">A3F</span>  <span class="n">A2F</span>  <span class="n">A2R</span>
+    <span class="n">forward</span> <span class="n">product</span> <span class="o">=</span> <span class="mf">4.680000000e+18</span>
+    <span class="n">backward</span> <span class="n">product</span> <span class="o">=</span> <span class="mf">4.680000000e+18</span>
+<span class="n">Cycle</span> <span class="mi">1</span> <span class="ow">is</span> <span class="n">formed</span> <span class="n">of</span> <span class="n">states</span><span class="p">:</span> <span class="n">AF</span>  <span class="n">A2F</span>  <span class="n">A2R</span>  <span class="n">AR</span>
+    <span class="n">forward</span> <span class="n">product</span> <span class="o">=</span> <span class="mf">4.250000000e+18</span>
+    <span class="n">backward</span> <span class="n">product</span> <span class="o">=</span> <span class="mf">4.250000000e+18</span>
+</pre></div>
+</div>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">timeit</span>
+<span class="n">dcprogslik</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="mi">10</span> <span class="n">loops</span><span class="p">,</span> <span class="n">best</span> <span class="n">of</span> <span class="mi">3</span><span class="p">:</span> <span class="mf">39.1</span> <span class="n">ms</span> <span class="n">per</span> <span class="n">loop</span>
+</pre></div>
+</div>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">timeit</span>
+<span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">mec</span><span class="o">.</span><span class="n">set_eff</span><span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">conc</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<span class="n">lik</span> <span class="o">=</span> <span class="o">-</span><span class="n">likelihood</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="n">mec</span><span class="o">.</span><span class="n">Q</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="mi">100</span> <span class="n">loops</span><span class="p">,</span> <span class="n">best</span> <span class="n">of</span> <span class="mi">3</span><span class="p">:</span> <span class="mf">8.65</span> <span class="n">ms</span> <span class="n">per</span> <span class="n">loop</span>
+</pre></div>
+</div>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">timeit</span>
+<span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">mec</span><span class="o">.</span><span class="n">set_eff</span><span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">conc</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<span class="n">lik</span> <span class="o">=</span> <span class="o">-</span><span class="n">likelihood</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="n">mec</span><span class="o">.</span><span class="n">Q</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="mi">100</span> <span class="n">loops</span><span class="p">,</span> <span class="n">best</span> <span class="n">of</span> <span class="mi">3</span><span class="p">:</span> <span class="mf">10.6</span> <span class="n">ms</span> <span class="n">per</span> <span class="n">loop</span>
+</pre></div>
+</div>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">timeit</span>
+<span class="n">i</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">mec</span><span class="o">.</span><span class="n">set_eff</span><span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">conc</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<span class="n">lik</span> <span class="o">=</span> <span class="o">-</span><span class="n">likelihood</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="n">mec</span><span class="o">.</span><span class="n">Q</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="mi">100</span> <span class="n">loops</span><span class="p">,</span> <span class="n">best</span> <span class="n">of</span> <span class="mi">3</span><span class="p">:</span> <span class="mi">9</span> <span class="n">ms</span> <span class="n">per</span> <span class="n">loop</span>
+</pre></div>
+</div>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="o">%%</span><span class="n">timeit</span>
+<span class="n">i</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">mec</span><span class="o">.</span><span class="n">set_eff</span><span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="n">conc</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+<span class="n">lik</span> <span class="o">=</span> <span class="o">-</span><span class="n">likelihood</span><span class="p">[</span><span class="n">i</span><span class="p">](</span><span class="n">mec</span><span class="o">.</span><span class="n">Q</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="mi">100</span> <span class="n">loops</span><span class="p">,</span> <span class="n">best</span> <span class="n">of</span> <span class="mi">3</span><span class="p">:</span> <span class="mf">7.72</span> <span class="n">ms</span> <span class="n">per</span> <span class="n">loop</span>
+</pre></div>
+</div>
+</div>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="bottom navigation">
+      
+        <p>
+        «&#160;&#160;<a href="CKS.html">CKF Model</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="Example_MLL_Fit_AChR_1patch.html">HJCFIT- maximum likelihood fit of single-channel data: a simple example</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2013-2016, University College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.
+    </div>
+  </body>
+</html>

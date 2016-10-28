@@ -1,0 +1,158 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>CKF Model &#8212; HJCFIT 0.9 documentation</title>
+    
+    <link rel="stylesheet" href="../_static/haiku.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.9',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="top" title="HJCFIT 0.9 documentation" href="../index.html" />
+    <link rel="up" title="Examples of the use of HJCFIT" href="../examples.html" />
+    <link rel="next" title="Distribution histograms and individual benchmarks" href="Distribution_histograms_and_individual_benchmark.html" />
+    <link rel="prev" title="CHS vector" href="CHSvectors.html" /> 
+  </head>
+  <body role="document">
+      <div class="header" role="banner"><h1 class="heading"><a href="../index.html">
+          <span>HJCFIT 0.9 documentation</span></a></h1>
+        <h2 class="heading"><span>CKF Model</span></h2>
+      </div>
+      <div class="topnav" role="navigation" aria-label="top navigation">
+      
+        <p>
+        «&#160;&#160;<a href="CHSvectors.html">CHS vector</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="Distribution_histograms_and_individual_benchmark.html">Distribution histograms and individual benchmarks</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="section" id="ckf-model">
+<h1>CKF Model<a class="headerlink" href="#ckf-model" title="Permalink to this headline">¶</a></h1>
+<p>The following tries to reproduce Fig 9 from <a class="reference external" href="http://dx.doi.org/10.1098/rstb.1992.0116">Hawkes, Jalali, Colquhoun
+(1992)</a>. First we create
+the <span class="math">\(Q\)</span>-matrix for this particular model.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
+</pre></div>
+</div>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+</pre></div>
+</div>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dcprogs.likelihood</span> <span class="k">import</span> <span class="n">QMatrix</span>
+
+<span class="n">tau</span> <span class="o">=</span> <span class="mf">0.2</span>
+<span class="n">qmatrix</span> <span class="o">=</span> <span class="n">QMatrix</span><span class="p">([[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">19</span><span class="p">,</span> <span class="o">-</span><span class="mi">29</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.026</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.026</span><span class="p">]],</span> <span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We then create a function to plot each exponential component in the
+asymptotic expression. An explanation on how to get to these plots can
+be found in the <strong>CH82</strong> notebook.</p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dcprogs.likelihood._methods</span> <span class="k">import</span> <span class="n">exponential_pdfs</span>
+
+<span class="k">def</span> <span class="nf">plot_exponentials</span><span class="p">(</span><span class="n">qmatrix</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nmax</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">shut</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">dcprogs.likelihood</span> <span class="k">import</span> <span class="n">missed_events_pdf</span>
+    <span class="kn">from</span> <span class="nn">dcprogs.likelihood._methods</span> <span class="k">import</span> <span class="n">exponential_pdfs</span>
+    <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fig</span><span class="p">,</span><span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="o">*</span><span class="n">tau</span><span class="p">,</span> <span class="n">tau</span><span class="o">/</span><span class="mi">10</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">x0</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">x0</span> <span class="o">=</span> <span class="n">x</span>
+    <span class="n">pdf</span> <span class="o">=</span> <span class="n">missed_events_pdf</span><span class="p">(</span><span class="n">qmatrix</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">nmax</span><span class="o">=</span><span class="n">nmax</span><span class="p">,</span> <span class="n">shut</span><span class="o">=</span><span class="n">shut</span><span class="p">)</span>
+    <span class="n">graphb</span> <span class="o">=</span> <span class="p">[</span><span class="n">x0</span><span class="p">,</span> <span class="n">pdf</span><span class="p">(</span><span class="n">x0</span><span class="o">+</span><span class="n">tau</span><span class="p">),</span> <span class="s1">&#39;-k&#39;</span><span class="p">]</span>
+    <span class="n">functions</span> <span class="o">=</span> <span class="n">exponential_pdfs</span><span class="p">(</span><span class="n">qmatrix</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">shut</span><span class="o">=</span><span class="n">shut</span><span class="p">)</span>
+    <span class="n">plots</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;.r&#39;</span><span class="p">,</span> <span class="s1">&#39;.b&#39;</span><span class="p">,</span> <span class="s1">&#39;.g&#39;</span><span class="p">]</span>
+    <span class="n">together</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">functions</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">plots</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">together</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">together</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">tau</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span> <span class="n">together</span> <span class="o">=</span> <span class="n">together</span> <span class="o">+</span> <span class="n">f</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="n">tau</span><span class="p">)</span>
+        <span class="n">graphb</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">together</span><span class="p">,</span> <span class="n">p</span><span class="p">])</span>
+
+
+    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="o">*</span><span class="n">graphb</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For practical reasons, we plot the excess shut-time probability
+densities in the graph below. In all other particulars, it should
+reproduce Fig. 9 from <a class="reference external" href="http://dx.doi.org/10.1098/rstb.1992.0116">Hawkes, Jalali, Colquhoun
+(1992)</a></p>
+<div class="code python highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dcprogs.likelihood</span> <span class="k">import</span> <span class="n">missed_events_pdf</span>
+
+<span class="n">fig</span><span class="p">,</span><span class="n">ax</span>  <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">10</span> <span class="p">))</span>
+<span class="c1">#ax = fig.add_subplot(2, 2, 1)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">tau</span><span class="o">/</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">pdf</span> <span class="o">=</span> <span class="n">missed_events_pdf</span><span class="p">(</span><span class="n">qmatrix</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="n">nmax</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">shut</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">pdf</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="s1">&#39;-k&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;time $t$ (ms)&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Shut-time probability density $f_{</span><span class="se">\\</span><span class="s1">bar{</span><span class="se">\\</span><span class="s1">tau}=0.2}(t)$&#39;</span><span class="p">)</span>
+
+<span class="n">tau</span> <span class="o">=</span> <span class="mf">0.2</span>
+<span class="n">x</span><span class="p">,</span> <span class="n">x0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="o">*</span><span class="n">tau</span><span class="p">,</span> <span class="n">tau</span><span class="o">/</span><span class="mf">10.0</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="o">*</span><span class="n">tau</span><span class="p">,</span> <span class="n">tau</span><span class="o">/</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">plot_exponentials</span><span class="p">(</span><span class="n">qmatrix</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">shut</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="n">x0</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Excess shut-time probability density $f_{{</span><span class="se">\\</span><span class="s1">bar{{</span><span class="se">\\</span><span class="s1">tau}}=</span><span class="si">{tau}</span><span class="s1">}}(t)$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tau</span><span class="o">=</span><span class="n">tau</span><span class="p">))</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;time $t$ (ms)&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">tick_right</span><span class="p">()</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_label_position</span><span class="p">(</span><span class="s2">&quot;right&quot;</span><span class="p">)</span>
+
+<span class="n">tau</span> <span class="o">=</span> <span class="mf">0.05</span>
+<span class="n">x</span><span class="p">,</span> <span class="n">x0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="o">*</span><span class="n">tau</span><span class="p">,</span> <span class="n">tau</span><span class="o">/</span><span class="mf">10.0</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="o">*</span><span class="n">tau</span><span class="p">,</span> <span class="n">tau</span><span class="o">/</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">plot_exponentials</span><span class="p">(</span><span class="n">qmatrix</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">shut</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="n">x0</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Excess shut-time probability density $f_{{</span><span class="se">\\</span><span class="s1">bar{{</span><span class="se">\\</span><span class="s1">tau}}=</span><span class="si">{tau}</span><span class="s1">}}(t)$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tau</span><span class="o">=</span><span class="n">tau</span><span class="p">))</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;time $t$ (ms)&#39;</span><span class="p">)</span>
+
+<span class="n">tau</span> <span class="o">=</span> <span class="mf">0.5</span>
+<span class="n">x</span><span class="p">,</span> <span class="n">x0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="o">*</span><span class="n">tau</span><span class="p">,</span> <span class="n">tau</span><span class="o">/</span><span class="mf">10.0</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="o">*</span><span class="n">tau</span><span class="p">,</span> <span class="n">tau</span><span class="o">/</span><span class="mi">100</span><span class="p">)</span>
+<span class="n">plot_exponentials</span><span class="p">(</span><span class="n">qmatrix</span><span class="p">,</span> <span class="n">tau</span><span class="p">,</span> <span class="n">shut</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">x0</span><span class="o">=</span><span class="n">x0</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Excess shut-time probability density $f_{{</span><span class="se">\\</span><span class="s1">bar{{</span><span class="se">\\</span><span class="s1">tau}}=</span><span class="si">{tau}</span><span class="s1">}}(t)$&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tau</span><span class="o">=</span><span class="n">tau</span><span class="p">))</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;time $t$ (ms)&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">tick_right</span><span class="p">()</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_label_position</span><span class="p">(</span><span class="s2">&quot;right&quot;</span><span class="p">)</span>
+
+<span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="../_images/CKS_8_0.png" src="../_images/CKS_8_0.png" />
+</div>
+
+
+      </div>
+      <div class="bottomnav" role="navigation" aria-label="bottom navigation">
+      
+        <p>
+        «&#160;&#160;<a href="CHSvectors.html">CHS vector</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="../index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="Distribution_histograms_and_individual_benchmark.html">Distribution histograms and individual benchmarks</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2013-2016, University College London.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.8.
+    </div>
+  </body>
+</html>
